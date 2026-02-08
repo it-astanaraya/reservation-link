@@ -682,22 +682,46 @@
 
                 if (!uploadSuccess) console.warn('All upload attempts failed for reschedule. Attempts:', triedResponses);
             } else if (isLunas && !isReschedule) {
-                // Untuk kasus pelunasan biasa (tidak reschedule), upload tiket paid
+                // Untuk kasus pelunasan biasa (tidak reschedule), upload tiket paid dengan fallback attempts
                 const ticketFileName = generateTicketFileName(bookingID, false, true);
-                const payload = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName };
-                const uploadPromise = fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 8000));
-                try {
-                    const resp = await Promise.race([uploadPromise, timeoutPromise]);
-                    const text = await resp.text();
-                    if (text.includes('SUCCESS')) {
-                        uploadSuccess = true;
-                    } else {
-                        console.warn('Upload paid response:', text);
+                let triedResponses = [];
+
+                const tryUpload = async (p) => {
+                    try {
+                        const resp = await Promise.race([fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }), new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 12000))]);
+                        const text = await resp.text();
+                        triedResponses.push(text);
+                        if (text && text.includes('SUCCESS')) return true;
+                        return false;
+                    } catch (err) {
+                        triedResponses.push(err.message);
+                        return false;
                     }
-                } catch (err) {
-                    console.warn('Paid upload failed/timeout:', err.message);
+                };
+
+                // Primary: try uploadPaidTicket with full payload
+                const primaryPayload = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName };
+                uploadSuccess = await tryUpload(primaryPayload);
+
+                if (!uploadSuccess) {
+                    // Fallback 1: try updateTicketDrive with paid flags
+                    const fallback1 = { action: 'updateTicketDrive', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isLunas: true, isPaid: true };
+                    uploadSuccess = await tryUpload(fallback1);
                 }
+
+                if (!uploadSuccess) {
+                    // Fallback 2: try minimal uploadPaidTicket payload
+                    const fallback2 = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64 };
+                    uploadSuccess = await tryUpload(fallback2);
+                }
+
+                if (!uploadSuccess) {
+                    // Fallback 3: try uploadRescheduleTicket with isPaid flag
+                    const fallback3 = { action: 'uploadRescheduleTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isReschedule: false, isLunas: true };
+                    uploadSuccess = await tryUpload(fallback3);
+                }
+
+                if (!uploadSuccess) console.warn('All upload attempts failed for paid ticket. Attempts:', triedResponses);
             }
 
             // Setup download button (local only)
@@ -854,21 +878,48 @@
         }
         let qBox = document.getElementById('qBox') || createQuotaBox();
         document.getElementById('qCount').innerText = "Memeriksa...";
+        document.getElementById('qCount').style.color = "#28a745";
         qBox.style.display = 'block';
-        try {
+        try {            
             const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "checkQuota", date: val }) });
             const result = await resp.json();
-            const remaining = 500 - (result.used || 0);
+    
+            const limitMaksimal = 500; // Nanti ini bisa kita buat dinamis
+            const used = result.used || 0;
+            const remaining = limitMaksimal - used;
+
+            const qCount = document.getElementById('qCount');
+            const btnNext = document.getElementById('btnNext1');
+            const qBox = document.getElementById('qBox');
+
             if (remaining <= 0) {
                 document.getElementById('qCount').innerText = "FULL BOOK";
                 document.getElementById('qCount').style.color = "#ff4444";
-                document.getElementById('btnNext1').disabled = true;
+                //document.getElementById('btnNext1').disabled = true;
+        
+                // Pesan tambahan untuk user
+                document.getElementById('priceInfo').innerHTML = `<span style="color: #d9534f; font-weight: bold;">Maaf, kuota hari ini sudah penuh. Silakan pilih tanggal lain.</span>`;
+        
+                btnNext.disabled = true;
+                btnNext.style.opacity = "0.5";
+                btnNext.style.backgroundColor = "#718096";
+                btnNext.innerText = "Kapasitas Penuh";
             } else {
                 document.getElementById('qCount').innerText = "Pax Tersedia";
                 document.getElementById('qCount').style.color = "#28a745";
-                document.getElementById('btnNext1').disabled = false;
+                //document.getElementById('btnNext1').disabled = false;
+        
+                // Kembalikan info harga jika sempat berubah
+                document.getElementById('priceInfo').innerText = `Dewasa: Rp ${currentDewasaPrice.toLocaleString('id-ID')} | Anak: Rp 80.000`;
+        
+                btnNext.disabled = false;
+                btnNext.style.opacity = "1";
+                btnNext.style.backgroundColor = "#f37021";
+                btnNext.innerText = "Lanjutkan Reservasi";
             }
-        } catch (e) { document.getElementById('qCount').innerText = "Koneksi Bermasalah"; }
+        } catch (e) { 
+            document.getElementById('qCount').innerText = "Gagal memuat kuota, coba lagi."; 
+        }
     });
 
     function createQuotaBox() {
@@ -1065,7 +1116,7 @@
                     // Jika rescheduleCount >= 1, maka tiket bernama Tiket-(ID)-Reschedule-Paid.png
                     // Jika rescheduleCount == 0, maka tiket bernama Tiket-(ID)-Paid.png
                     const isAlreadyRescheduled = (window.rescheduleCount && window.rescheduleCount >= 1) ? true : false;
-                    generateSuccessTicket(
+                    await generateSuccessTicket(
                         document.getElementById('resID').value, // ID Booking
                         tempResData.oldDateRaw,                 // Tanggal
                         tempResData.name,                        // Nama
