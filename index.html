@@ -219,7 +219,7 @@
                 <div id="resStep1">
                     <h5 class="fw-bold mb-3" style="color: #333; font-size: 1.1rem;">Cek Reservasi Anda</h5>
                     <label class="form-label" style="font-size: 0.8rem;">Nomor Reservasi (Booking ID)*</label>
-                    <input type="text" id="resID" class="form-control mb-4" placeholder="Contoh: 2002-05-ABC" style="padding: 12px; font-size: 16px; border-radius: 8px;">
+                    <input type="text" id="resID" class="form-control mb-4" placeholder="Contoh: 2002-05-ABC" style="padding: 12px; font-size: 16px; border-radius: 8px; text-transform: uppercase; font-family: 'Courier New', monospace; letter-spacing: 0.5px;" maxlength="11" autocomplete="off">
                     <button type="button" class="btn w-100 fw-bold" onclick="findReservation()" style="background: #f37021; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;">CEK DATA</button>
                 </div>
 
@@ -322,6 +322,42 @@
             return `Tiket-${bookingID}.png`;
         }
     }
+
+    // Format Booking ID dengan auto-dash, auto-uppercase, dan validasi karakter
+    function formatBookingID(value) {
+        // 1. Hanya izinkan huruf dan angka (hapus simbol apapun)
+        let cleaned = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        
+        // 2. Auto-dash: Format XXXX-XX-XXXX
+        // Pisahkan menjadi bagian: 4 karakter, 2 karakter, sisanya
+        let formatted = '';
+        
+        for (let i = 0; i < cleaned.length && i < 9; i++) {
+            if (i === 4 || i === 6) {
+                formatted += '-';
+            }
+            formatted += cleaned[i];
+        }
+        
+        return formatted;
+    }
+
+    // Setup Booking ID input formatter
+    document.addEventListener('DOMContentLoaded', function() {
+        const resIDInput = document.getElementById('resID');
+        if (resIDInput) {
+            resIDInput.addEventListener('input', function(e) {
+                e.target.value = formatBookingID(e.target.value);
+            });
+            
+            // Handle paste event
+            resIDInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                e.target.value = formatBookingID(pastedText);
+            });
+        }
+    });
 
     const resModal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
     function showRescheduleModal() { 
