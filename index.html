@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation - Astanarasa Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <style>
+        :root { --accent-color: #f37021; --bg-dark: #3b3b3b; --card-white: #ffffff; }
+        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #fff; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .main-card { background: var(--card-white); color: #333; border-radius: 16px; max-width: 480px; margin: 15px auto; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .header-banner { background: #fff; padding: 15px 15px 12px 15px; text-align: center; }
+        .header-banner h2 { color: #888; font-size: 1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 2px; }
+        .header-img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; background: #222; margin-bottom: 8px; }
+        .stepper-wrapper { display: flex; justify-content: center; padding: 15px 0; background: #fafafa; border-bottom: 1px solid #eee; gap: 10px; flex-wrap: wrap; }
+        .step-item { display: flex; flex-direction: column; align-items: center; width: 70px; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.4s; font-size: 0.9rem; }
+        .step-item.active .step-circle { background: #28a745; transform: scale(1.1); }
+        .step-label { font-size: 9px; margin-top: 4px; color: #999; font-weight: 700; text-transform: uppercase; }
+        .step-item.active .step-label { color: #28a745; }
+        .content-area { padding: 20px 15px; }
+        .form-label { font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; margin-bottom: 6px; }
+        .form-control, .form-select { border: 1px solid #ddd; padding: 14px 12px; border-radius: 8px; font-size: 1rem; min-height: 48px; font-size: 16px; }
+        .form-control:focus, .form-select:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(243, 112, 33, 0.1); outline: none; }
+        #menuContainer { background: #fffaf5; border: 2px dashed #f37021; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
+        #menuContainer:active { background: #fff0e5; }
+        #menuDisplay { width: 100%; max-width: 150px; border-radius: 8px; margin-top: 8px; }
+        .btn-primary-custom { background: var(--accent-color); border: none; color: #fff; width: 100%; padding: 18px 15px; border-radius: 8px; font-weight: 700; transition: 0.3s; font-size: 1rem; min-height: 50px; cursor: pointer; -webkit-appearance: none; appearance: none; }
+        .btn-primary-custom:hover { background: #d65d1a; }
+        .btn-primary-custom:active { background: #d65d1a; opacity: 0.9; }
+        .btn-primary-custom:disabled { background: #ccc; cursor: not-allowed; }
+        .hidden { display: none !important; }
+        .nav-pills .nav-link { color: #666; font-size: 0.75rem; font-weight: bold; border: 1px solid #ddd; margin: 0 3px; padding: 8px 12px; min-height: 42px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; -webkit-appearance: none; appearance: none; }
+        .nav-pills .nav-link.active { background-color: var(--accent-color) !important; border-color: var(--accent-color); color: #fff; }
+        #vaNumber, #vaNumber2 { letter-spacing: 1px; color: #f37021; font-size: 1.2rem; word-break: break-all; }
+        .quota-badge-center { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); color: #fff; padding: 25px 35px; border-radius: 15px; text-align: center; z-index: 10001; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #444; min-width: 220px; }
+        .quota-badge-center h6 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; color: #ccc; }
+        .quota-badge-center h2 { font-size: 2rem; font-weight: 800; margin: 0; color: #28a745; }
+        .summary-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+        #successOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; overflow-y:auto; }
+        .ticket-card { background:#fff; color:#333; width:100%; max-width:350px; border-radius:0px; overflow:visible !important; position:relative; text-align:center; display:block; height:auto; }
+        .modal-portrait { max-width: 100%; margin: auto; }
+        #loader { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center; }
+        .alert { border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            body { padding: 0; }
+            .main-card { margin: 10px; border-radius: 12px; max-height: 100vh; overflow-y: auto; }
+            .header-banner { padding: 12px 12px 10px 12px; }
+            .header-banner h2 { font-size: 0.95rem; margin-bottom: 8px; }
+            .header-img { height: 100px; }
+            .stepper-wrapper { padding: 12px 5px; gap: 5px; }
+            .step-item { width: 60px; }
+            .step-circle { width: 30px; height: 30px; font-size: 0.85rem; }
+            .step-label { font-size: 8px; margin-top: 3px; }
+            .content-area { padding: 15px 12px; overflow-y: auto; max-height: calc(100vh - 250px); }
+            .form-label { font-size: 0.7rem; }
+            .form-control, .form-select { padding: 13px 11px; font-size: 16px; }
+            .btn-primary-custom { padding: 16px 12px; font-size: 0.95rem; min-height: 48px; }
+            .btn-primary-custom:active { background: #d65d1a; }
+            .nav-pills { flex-wrap: wrap; }
+            .nav-pills .nav-link { font-size: 0.7rem; padding: 7px 10px; margin: 2px; min-height: 40px; }
+            .ticket-card { max-width: 100%; }
+            .modal-content { border-radius: 12px; margin: 10px; }
+            .modal-header { padding: 12px 15px; }
+            .modal-body { padding: 15px; max-height: 70vh; overflow-y: auto; }
+            .modal-footer { padding: 12px 15px; }
+            .row.g-2 > .col-6 { padding: 0.5rem; }
+            .alert { padding: 12px; font-size: 0.85rem; }
+        }
+        
+        /* Tablet Optimization */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .main-card { margin: 20px auto; }
+            .content-area { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner-border text-light"></div></div>
+
+<div class="container">
+    <div class="main-card">
+        <div class="header-banner">
+            <h2>ASTANARASA RESTO & DINING</h2>
+            <img src="asset/img/header-landscape.jpg" class="header-img">
+        </div>
+        <div class="stepper-wrapper">
+            <div class="step-item active" id="stepIcon1"><div class="step-circle">1</div><div class="step-label">Jadwal</div></div>
+            <div class="step-item" id="stepIcon2"><div class="step-circle">2</div><div class="step-label">Data</div></div>
+            <div class="step-item" id="stepIcon3"><div class="step-circle">3</div><div class="step-label">Review</div></div>
+        </div>
+        <form id="reservationForm" class="content-area">
+            <div id="step1">
+                <div class="mb-4">
+                    <label class="form-label">Pilih Tanggal Reservasi*</label>
+                    <input type="date" name="date" id="datePicker" class="form-control" required min="2026-02-20" max="2026-03-19">
+                    <div id="priceInfo" class="small mt-1 text-muted fw-bold"></div>
+                </div>
+                <div id="menuContainer" class="hidden" onclick="showLightbox()">
+                    <span class="badge bg-warning text-dark mb-2">KLIK GAMBAR UNTUK DETAIL</span>
+                    <h6 id="menuTitle" class="fw-bold mb-2"></h6>
+                    <img id="menuDisplay" src="">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><label class="form-label">Dewasa</label><input type="number" id="paxDewasa" class="form-control" value="1" min="0"></div>
+                    <div class="col-6"><label class="form-label">Anak-anak</label><input type="number" id="paxAnak" class="form-control" value="0" min="0"></div>
+                </div>
+                <input type="hidden" name="pax" id="paxTotal">
+                <button type="button" class="btn-primary-custom" id="btnNext1" onclick="checkQuotaAndTerms()">LANJUT KE DATA DIRI</button>
+                <div class="text-center mt-3">
+                    <p class="small text-muted">🏷️ Kelola Pesanan  <a href="javascript:void(0)" class="text-primary fw-bold" onclick="showRescheduleModal()">(Pelunasan / Reschedule)</a></p>
+                </div>
+            </div>
+
+            <div id="step2" class="hidden">
+                <a href="javascript:void(0)" style="color:#888; text-decoration:none; font-size:0.85rem;" onclick="goToStep(1)">&larr; KEMBALI</a>
+                <div class="mb-3 mt-2">
+                    <label class="form-label">Panggilan</label>
+                    <div class="d-flex gap-2">
+                        <input type="radio" class="btn-check" name="title" id="mr" value="Mr." checked><label class="btn btn-outline-secondary btn-sm w-100" style="min-height: 48px; display: flex; align-items: center; justify-content: center;" for="mr">Mr.</label>
+                        <input type="radio" class="btn-check" name="title" id="mrs" value="Mrs."><label class="btn btn-outline-secondary btn-sm w-100" style="min-height: 48px; display: flex; align-items: center; justify-content: center;" for="mrs">Mrs.</label>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><label class="form-label">Nama Depan*</label><input type="text" name="fname" class="form-control" required></div>
+                    <div class="col-6"><label class="form-label">Nama Belakang</label><input type="text" name="lname" class="form-control"></div>
+                </div>
+                <div class="mb-3"><label class="form-label">WhatsApp*</label><input type="tel" name="phone" class="form-control" value="+62" required></div>                
+                <div class="mb-4"><label class="form-label">Permintaan Khusus<span style="font-size: 0.7rem; font-weight: 400; color: #aaa; text-transform: none; margin-left: 5px;">(Sesuai ketersediaan)</span></label><textarea name="request" class="form-control" rows="3" placeholder="Contoh : Birthday Surprise..." style="min-height: 80px;"></textarea></div>
+                <button type="button" class="btn-primary-custom" onclick="validateStep2()">KONFIRMASI PESANAN</button>
+            </div>
+
+            <div id="step3" class="hidden text-dark">
+                <a href="javascript:void(0)" style="color:#888; text-decoration:none; font-size:0.85rem;" onclick="goToStep(2)">&larr; EDIT DATA</a>
+                <h5 class="fw-bold mb-3">Review Reservasi</h5>
+                <div class="p-3 bg-light rounded-3 mb-3" id="finalSummary"></div>
+
+                <div class="text-center border rounded-3 p-3 mb-3 bg-white">
+                    <p class="small fw-bold text-muted mb-3">PILIH METODE PEMBAYARAN</p>
+                    <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
+                        <li class="nav-item"><button class="nav-link btn-sm" id="tab-qris" data-bs-toggle="pill" data-bs-target="#pay-qris" type="button" disabled style="opacity: 0.5; cursor: not-allowed;">QRIS (Off)</button></li>
+                        <li class="nav-item"><button class="nav-link active btn-sm" id="tab-va" data-bs-toggle="pill" data-bs-target="#pay-va" type="button">Transfer VA</button></li>
+                    </ul>
+                    
+                    <div class="tab-content border-top pt-3">
+                        <div class="tab-pane fade" id="pay-qris">
+                            <img id="qrisImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ASTANARASA" class="mb-2 border p-2 shadow-sm">
+                            <div class="mb-2"><button type="button" class="btn btn-sm btn-outline-dark" style="font-size: 10px;" onclick="downloadQR()">💾 Download QRIS</button></div>
+                        </div>
+                        <div class="tab-pane fade show active" id="pay-va">
+                            <div class="p-3 bg-light rounded border mb-3" style="text-align: center;">
+                                <p class="mb-2 text-muted" style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">BANK MANDIRI (VA)</p>
+                                <h4 class="fw-bold mb-3" id="vaNumber" style="letter-spacing: 2px; color: #f37021;">889081234567890</h4>
+                                            <button id="copyVaBtn" type="button" class="btn btn-dark w-100 fw-bold" style="font-size: 0.9rem; min-height: 45px;" onclick="copyVA()">📋 Salin No. VA</button>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #888; text-align: center;">*Pastikan nominal transfer sesuai dengan total bayar</p>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold text-danger mt-3" id="totalBayarText"></h5>
+                </div>
+
+                <div class="alert alert-warning mt-3"><p id="textMinimalDP" class="text-danger mb-0 fw-bold" style="font-size: 0.95rem;">Minimal Panjar (50%): Rp 0</p></div>
+                <div class="mb-4">
+                    <label class="form-label">Nominal Transfer</label>
+                    <input type="number" class="form-control" id="nominalTransfer" oninput="calculateInvoice()" placeholder="Contoh: 500000">
+                    <small id="msgErrorDP" class="text-danger font-weight-bold d-block mt-2"></small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-danger fw-bold">Upload Bukti Pembayaran*</label>
+                    <input type="file" id="buktiBayar" class="form-control" accept="image/*" required onchange="handleBuktiUpload()" style="height: 50px; font-size: 0.95rem;">
+                    <small class="text-muted d-block mt-2">Format: JPG, PNG (Max 2MB)</small>
+                </div>                
+                <button type="submit" class="btn-primary-custom" id="submitBtn" disabled>KIRIM RESERVASI</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="termsModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-portrait">
+        <div class="modal-content text-dark" style="border-radius: 12px;">
+            <div class="modal-header border-0 py-3"><h6 class="modal-title fw-bold">Syarat & Ketentuan</h6></div>
+            <div class="modal-body py-3" style="font-size: 0.8rem; max-height: 60vh; overflow-y: auto;">
+                <p class="mb-2">1. Unggah bukti pembayaran untuk konfirmasi.</p>
+                <p class="mb-2">2. Hadir 15 menit sebelum jadwal.</p>
+                <p class="mb-2">3. Toleransi keterlambatan 30 menit.</p>
+                <p class="mb-2">4. Pemesanan slice cake birthday, konfirmasi langsung dikasir.</p>
+                <p class="mb-2">5. Dilarang membawa masuk atau membawa keluar makanan/minuman.</p>
+                <p class="mb-2">6. Dilarang membawa banner atau umbul-umbul kegiatan.</p>
+                <p class="mb-2">7. Pembatalan kurang dari 24 jam dianggap hangus.</p>
+                <p class="mb-0">8. Dilarang melakukan aktivitas yang mengganggu tamu lain.</p>
+            </div>
+            <div class="modal-footer flex-column py-3 border-top">
+                <div class="form-check w-100 mb-3">
+                    <input class="form-check-input" type="checkbox" id="agreeCheck" onchange="document.getElementById('btnAgree').disabled = !this.checked">
+                    <label class="form-check-label fw-bold" style="font-size:0.85rem;">Saya Setuju dengan Syarat & Ketentuan</label>
+                </div>
+                <button type="button" class="btn btn-primary btn-block w-100 fw-bold" id="btnAgree" disabled onclick="goToStep(2); bootstrap.Modal.getInstance(document.getElementById('termsModal')).hide();" style="min-height: 50px; font-size: 0.95rem;">LANJUTKAN</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rescheduleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered text-dark" style="max-width: 100%; margin: 0; max-height: 100vh;">
+        <div class="modal-content" style="border-radius: 16px; max-height: 95vh; overflow-y: auto; margin: 10px;">
+            <div class="modal-header border-0 py-2 px-3" style="justify-content: flex-end; padding-top: 15px !important;">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size: 1.5rem;"></button>
+            </div>
+            <div class="modal-body" style="padding: 0 18px 25px 18px;">
+                <!-- Step 1: Cek Data (Input Booking ID) -->
+                <div id="resStep1">
+                    <h5 class="fw-bold mb-3" style="color: #333; font-size: 1.1rem;">Cek Reservasi Anda</h5>
+                    <label class="form-label" style="font-size: 0.8rem;">Nomor Reservasi (Booking ID)*</label>
+                    <input type="text" id="resID" class="form-control mb-4" placeholder="Contoh: 2002-05-ABC" style="padding: 12px; font-size: 16px; border-radius: 8px;">
+                    <button type="button" class="btn w-100 fw-bold" onclick="findReservation()" style="background: #f37021; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;">CEK DATA</button>
+                </div>
+
+                <!-- Step 2: Pilihan Reschedule atau Pelunasan -->
+                <div id="resStep2" class="hidden">
+                    <div id="resInfo" class="alert alert-info py-3 mb-4" style="font-size: 0.9rem; border-radius: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; color: #004085; margin: 0;"></div>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem; text-align: center;">Pilih layanan yang Anda butuhkan:</p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <button id="btnChooseReschedule" type="button" class="btn btn-outline-primary w-100 fw-bold" style="padding: 28px 12px; min-height: 110px; font-size: 0.85rem; border-radius: 10px; border-width: 2px;" onclick="chooseReschedule()">
+                                <div style="font-size: 2rem; margin-bottom: 8px; line-height: 1;">📅</div>
+                                <div style="margin-bottom: 2px; font-weight: 700; font-size: 0.9rem;">Reschedule</div>
+                                <div style="font-size: 0.65rem; font-weight: 400; color: #666;">Ubah Jadwal</div>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-success w-100 fw-bold" style="padding: 28px 12px; min-height: 110px; font-size: 0.85rem; border-radius: 10px; border-width: 2px;" onclick="choosePelunasan()">
+                                <div style="font-size: 2rem; margin-bottom: 8px; line-height: 1;">💳</div>
+                                <div style="margin-bottom: 2px; font-weight: 700; font-size: 0.9rem;">Pelunasan</div>
+                                <div style="font-size: 0.65rem; font-weight: 400; color: #666;">Bayar Sisa</div>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="resNote" class="text-muted" style="font-size: 0.8rem; margin-top: 12px; text-align: center; color: #999;"></div>
+                </div>
+
+                <!-- Step 3a: Reschedule - Pilih Tanggal Baru -->
+                <div id="resStep3a" class="hidden">
+                    <button type="button" class="btn btn-link p-0 mb-3 fw-bold" style="color: #888; font-size: 0.9rem; text-decoration: none;" onclick="goBackToChoose()">← KEMBALI</button>
+                    <h5 class="fw-bold mb-3" style="color: #333; font-size: 1rem;">Pilih Tanggal Baru</h5>
+                    <div id="resInfo2" class="alert alert-info py-3 mb-3" style="font-size: 0.85rem; border-radius: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; color: #004085; margin: 0;"></div>
+                    <label class="form-label" style="font-size: 0.8rem;">Tanggal Reservasi Baru*</label>
+                    <input type="date" id="newDate" class="form-control mb-4" style="padding: 12px; font-size: 16px; border-radius: 8px;">
+                    <button type="button" class="btn w-100 fw-bold" id="btnSaveReschedule" onclick="submitReschedule()" style="background: #28a745; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;">SIMPAN PERUBAHAN</button>
+                </div>
+
+                <!-- Step 3b: Pelunasan - Bayar Sisa -->
+                <div id="resStep3b" class="hidden">
+                    <button type="button" class="btn btn-link p-0 mb-3 fw-bold" style="color: #888; font-size: 0.9rem; text-decoration: none;" onclick="goBackToChoose()">← KEMBALI</button>
+                    <h5 class="fw-bold mb-3" style="color: #333; font-size: 1rem;">Pelunasan Sisa Pembayaran</h5>
+                    <div id="resInfo3" class="alert alert-info py-3 mb-3" style="font-size: 0.85rem; border-radius: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; color: #004085; margin: 0;"></div>
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+                        <p class="mb-2" style="font-size: 0.8rem; font-weight: 600; color: #856404; margin: 0;">TOTAL SISA BAYAR</p>
+                        <h3 id="sisaBayarText" class="fw-bold mb-0" style="color: #dc3545; font-size: 1.5rem; letter-spacing: 1px;">Rp 0</h3>
+                    </div>
+
+                    <div style="background: #f8f9fa; border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: center;">
+                        <p class="mb-2" style="font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; margin: 0;">No. Rekening Bank Mandiri</p>
+                        <h4 class="fw-bold mb-3" id="vaNumber2" style="letter-spacing: 2px; color: #f37021; font-size: 1.3rem; margin: 0;">889081234567890</h4>
+                        <button id="copyVa2Btn" type="button" class="btn btn-dark w-100 fw-bold" style="font-size: 0.9rem; min-height: 44px; padding: 10px; border-radius: 8px;" onclick="copyVA2()">📋 SALIN NOMOR VA</button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #333;">Upload Bukti Pelunasan*</label>
+                        <input type="file" id="buktiPelunasanFile" class="form-control" accept="image/*" onchange="handlePelunasanUpload()" style="padding: 12px; font-size: 16px; height: auto; border-radius: 8px;">
+                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">Format: JPG, PNG | Ukuran Maks: 2MB</small>
+                    </div>
+                    
+                    <button type="button" onclick="processPelunasan()" id="btnPelunasan" class="btn w-100 fw-bold" style="background: #28a745; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;" disabled>
+                        ✅ KONFIRMASI PELUNASAN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imgPreviewModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center p-0"><img id="lightboxImg" src="" class="img-fluid rounded"><div class="p-3"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button></div></div></div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxniTvvkLhnv8_ABVIocDajjxuLQ3ZrgmOUXDXWYH4I5Xv9_KvAIyuElRW6Kr-31X8yqA/exec'; 
+    const menuData = { "2026-02-19": "Menu A", "2026-02-20": "Menu B", "2026-02-21": "Menu C", "2026-02-22": "Menu D", "2026-02-23": "Menu E", "2026-02-24": "Menu F", "2026-02-25": "Menu G", "2026-02-26": "Menu H", "2026-02-27": "Menu I", "2026-02-28": "Menu J", "2026-03-01": "Menu A", "2026-03-02": "Menu B", "2026-03-03": "Menu C", "2026-03-04": "Menu D", "2026-03-05": "Menu E", "2026-03-06": "Menu F", "2026-03-07": "Menu G", "2026-03-08": "Menu H", "2026-03-09": "Menu I", "2026-03-10": "Menu J", "2026-03-11": "Menu A", "2026-03-12": "Menu B", "2026-03-13": "Menu C", "2026-03-14": "Menu D", "2026-03-15": "Menu E", "2026-03-16": "Menu F", "2026-03-17": "Menu G", "2026-03-18": "Menu H", "2026-03-19": "Menu I" };
+    const menuImages = { "Menu A": "asset/img/menu-a.jpg", "Menu B": "asset/img/menu-b.jpg", "Menu C": "asset/img/menu-c.jpg", "Menu D": "asset/img/menu-d.jpg", "Menu E": "asset/img/menu-e.jpg", "Menu F": "asset/img/menu-f.jpg", "Menu G": "asset/img/menu-g.jpg", "Menu H": "asset/img/menu-h.jpg", "Menu I": "asset/img/menu-i.jpg", "Menu J": "asset/img/menu-j.jpg" };
+    const formatIDR = (val) => "Rp " + Number(val).toLocaleString('id-ID');
+
+    let currentDewasaPrice = 150000; 
+    const hargaAnak = 80000;
+    let tempResData = {};
+    
+    // Tracking status tiket untuk naming convention
+    window.ticketStatus = {
+        isReschedule: false,  // true jika sedang reschedule
+        isLunas: false        // true jika sudah lunas/paid
+    };
+    
+    // Tracking reschedule count dari server
+    window.rescheduleCount = 0;
+    
+    // Fungsi helper untuk generate nama file tiket berdasarkan kondisi
+    function generateTicketFileName(bookingID, isReschedule, isLunas) {
+        if (isReschedule && isLunas) {
+            return `Tiket-${bookingID}-Reschedule-Paid.png`;
+        } else if (isReschedule && !isLunas) {
+            return `Tiket-${bookingID}-Reschedule.png`;
+        } else if (!isReschedule && isLunas) {
+            return `Tiket-${bookingID}-Paid.png`;
+        } else {
+            return `Tiket-${bookingID}.png`;
+        }
+    }
+
+    const resModal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+    function showRescheduleModal() { 
+        // Reset semua step ke awal
+        window.rescheduleCount = 0; // Reset reschedule count
+        document.getElementById('resID').value = '';
+        document.getElementById('newDate').value = '';
+        document.getElementById('buktiPelunasanFile').value = '';
+        const resNoteEl = document.getElementById('resNote');
+        if (resNoteEl) resNoteEl.innerText = ''; // Clear help text
+        document.getElementById('resStep1').classList.remove('hidden');
+        document.getElementById('resStep2').classList.add('hidden');
+        document.getElementById('resStep3a').classList.add('hidden');
+        document.getElementById('resStep3b').classList.add('hidden');
+        resModal.show(); 
+    }
+
+    async function findReservation() {
+        const id = document.getElementById('resID').value;
+        if(!id) return alert("Masukkan ID Reservasi!");
+        
+        document.getElementById('loader').style.display = 'flex';
+        try {
+            const resp = await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: "findBooking", bookingID: id }) 
+            });
+
+            if (!resp.ok) throw new Error("Server error");
+
+            const data = await resp.json();
+            
+            if(data.found) {
+                window.isReschedule = true;
+                dataInvoice.bayar = data.bayar;
+                dataInvoice.sisa = data.sisa;
+                // FIX: Pastikan data pax tersimpan dengan benar
+                tempResData = {
+                    name: data.name,
+                    paxDetail: data.pax, // Mengambil data pax dari kolom sheet
+                    oldDateRaw: data.oldDateRaw
+                };
+
+                // Cek apakah sudah lunas atau masih ada sisa
+                const isLunas = (data.sisa === 0 || data.sisa === "Lunas" || !data.sisa);
+                
+                // Simpan info paket untuk pilihan reschedule
+                const oldDateObj = new Date(data.oldDateRaw);
+                const isPromo = (oldDateObj >= new Date("2026-02-20") && oldDateObj <= new Date("2026-03-02"));
+                
+                window.currentPackageInfo = {
+                    isPromo: isPromo,
+                    isLunas: isLunas,
+                    name: data.name
+                };
+
+                // Tampilkan info di resStep2
+                document.getElementById('resInfo').innerHTML = `Halo <b>${data.name}</b>, Paket Anda: <b>${isPromo ? 'Promo' : 'Normal'}</b>. Sisa Bayar: <b style="color: ${isLunas ? '#28a745' : '#f37021'};">${isLunas ? 'LUNAS' : 'Rp ' + Number(data.sisa).toLocaleString('id-ID')}</b>`;
+                
+                // Sembunyikan pilihan pelunasan jika sudah lunas
+                const pelunasanBtn = document.querySelector('#resStep2 .btn-outline-success');
+                if (isLunas) {
+                    pelunasanBtn.disabled = true;
+                    pelunasanBtn.style.opacity = '0.5';
+                    pelunasanBtn.style.cursor = 'not-allowed';
+                    pelunasanBtn.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 5px;">✅</div><div>Sudah Lunas</div>`;
+                } else {
+                    pelunasanBtn.disabled = false;
+                    pelunasanBtn.style.opacity = '1';
+                    pelunasanBtn.style.cursor = 'pointer';
+                    pelunasanBtn.innerHTML = `<div style="font-size: 1.5rem; margin-bottom: 5px;">💳</div><div>Pelunasan</div><div style="font-size: 0.7rem; font-weight: normal; margin-top: 3px;">Bayar Sisa</div>`;
+                }
+
+                // Batasi reschedule hanya 1 kali (jika server mengirim jumlah reschedule)
+                const rescheduleBtn = document.getElementById('btnChooseReschedule') || document.querySelector('#resStep2 .btn-outline-primary');
+                // Deteksi berbagai kemungkinan nama field dari server (kolom N pada sheet Data)
+                const resFields = ['rescheduleCount','resCount','reschedules','reschedule','reschedule_times','reschedule_count','times_rescheduled','rescheduleHistory','hasReschedule','rescheduled'];
+                let resCount = 0;
+                for (const k of resFields) {
+                    if (data[k] !== undefined && data[k] !== null) {
+                        const v = data[k];
+                        if (typeof v === 'number') { resCount = Math.max(resCount, v); }
+                        else if (typeof v === 'string') {
+                            const n = parseInt(v.replace(/[^0-9]/g, ''), 10);
+                            if (!isNaN(n)) resCount = Math.max(resCount, n);
+                            else if (/^\s*(true|yes|y)\s*$/i.test(v)) resCount = Math.max(resCount, 1);
+                        } else if (typeof v === 'boolean' && v === true) {
+                            resCount = Math.max(resCount, 1);
+                        }
+                    }
+                }
+                // Simpan resCount ke global variable untuk digunakan di processPelunasan
+                window.rescheduleCount = resCount;
+                
+                if (resCount >= 1 && rescheduleBtn) {
+                    rescheduleBtn.disabled = true;
+                    rescheduleBtn.style.opacity = '0.5';
+                    rescheduleBtn.style.cursor = 'not-allowed';
+                    rescheduleBtn.innerHTML = `<div style="font-size: 1.2rem; margin-bottom: 5px;">🔁</div><div>Sudah Reschedule</div>`;
+                    const noteEl = document.getElementById('resNote');
+                    if (noteEl) noteEl.innerText = 'Anda sudah melakukan reschedule sebelumnya.';
+                } else if (rescheduleBtn) {
+                    rescheduleBtn.disabled = false;
+                    rescheduleBtn.style.opacity = '1';
+                    rescheduleBtn.style.cursor = 'pointer';
+                    const noteEl2 = document.getElementById('resNote');
+                    if (noteEl2) noteEl2.innerText = '';
+                }
+
+                document.getElementById('resStep1').classList.add('hidden');
+                document.getElementById('resStep2').classList.remove('hidden');
+            } else { alert("Data tidak ditemukan."); }
+        } catch (e) { alert("Error koneksi."); }
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function chooseReschedule() {
+        const packageInfo = window.currentPackageInfo;
+        
+        // Set min/max date untuk reschedule
+        const dateInput = document.getElementById('newDate');
+        if(packageInfo.isPromo) {
+            dateInput.min = "2026-02-20";
+            dateInput.max = "2026-03-02";
+        } else {
+            dateInput.min = "2026-03-03";
+            dateInput.max = "2026-03-19";
+        }
+
+        document.getElementById('resInfo2').innerHTML = `Pilih tanggal baru untuk ${packageInfo.isPromo ? 'Promo' : 'Normal'} (${dateInput.min} s/d ${dateInput.max})`;
+        
+        document.getElementById('resStep2').classList.add('hidden');
+        document.getElementById('resStep3a').classList.remove('hidden');
+    }
+
+    function choosePelunasan() {
+        const id = document.getElementById('resID').value;
+        const packageInfo = window.currentPackageInfo;
+        
+        document.getElementById('resInfo3').innerHTML = `Silakan transfer sisa pembayaran untuk ${packageInfo.name}`;
+        document.getElementById('sisaBayarText').innerText = 'Rp ' + Number(dataInvoice.sisa).toLocaleString('id-ID');
+        document.getElementById('vaNumber2').innerText = document.getElementById('vaNumber').innerText;
+        
+        document.getElementById('resStep2').classList.add('hidden');
+        document.getElementById('resStep3b').classList.remove('hidden');
+    }
+
+    function goBackToChoose() {
+        document.getElementById('resStep3a').classList.add('hidden');
+        document.getElementById('resStep3b').classList.add('hidden');
+        document.getElementById('resStep2').classList.remove('hidden');
+        document.getElementById('newDate').value = '';
+        document.getElementById('buktiPelunasanFile').value = '';
+    }
+
+    function copyVA2() {
+        const vaNum = document.getElementById('vaNumber2').innerText;
+        const btn = document.getElementById('copyVa2Btn');
+        navigator.clipboard.writeText(vaNum).then(() => {
+            if (!btn) return;
+            const prev = btn.innerHTML;
+            btn.classList.remove('btn-dark');
+            btn.classList.add('btn-success');
+            btn.innerText = 'Berhasil disalin';
+            setTimeout(() => {
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-dark');
+                btn.innerHTML = prev;
+            }, 2000);
+        });
+    }
+
+    async function submitReschedule() {
+        const id = document.getElementById('resID').value;
+        const newD = document.getElementById('newDate').value;
+        if(!newD) return alert("Pilih tanggal!");
+    
+        document.getElementById('loader').style.display = 'flex';
+        document.getElementById('btnSaveReschedule').disabled = true;
+        
+        try {
+            // 1. Update Database & Ambil Status
+            const response = await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: "updateDate", bookingID: id, newDate: newD }) 
+            });
+            const result = await response.text();
+        
+            if(result === "LIMIT_REACHED") {
+                alert("Maaf, Reschedule hanya diperbolehkan maksimal 1 kali.");
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('btnSaveReschedule').disabled = false;
+            } else if(result.startsWith("SUCCESS")) {
+                // 2. Generate Tiket & Kirim ke Drive (await upload result)
+                const uploaded = await generateSuccessTicket(id, newD, tempResData.name, tempResData.paxDetail, true);
+                // Tutup modal setelah upload selesai
+                resModal.hide();
+                if (uploaded) {
+                    alert('Reschedule berhasil dan tiket tersimpan di Drive.');
+                } else {
+                    alert('Reschedule berhasil, namun penyimpanan tiket ke Drive gagal/timeout. Silakan unduh tiket secara manual.');
+                }
+            }
+        } catch (e) { 
+            alert("Gagal update database."); 
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('btnSaveReschedule').disabled = false;
+        }
+    }
+
+    async function generateSuccessTicket(bookingID, dateVal, fullName, paxDetail, isReschedule = false) {
+        const cantik = getTanggalCantik(dateVal);
+        const fixedTime = "17:45 - 20:00";
+        const isLunas = (dataInvoice.sisa === 0 || dataInvoice.sisa === "Lunas");
+        
+        // Update global tracking status untuk naming convention
+        window.ticketStatus.isReschedule = isReschedule;
+        window.ticketStatus.isLunas = isLunas;
+        
+        // LOGIC: Tentukan styling berdasarkan kombinasi reschedule + lunas
+        let labelStatus = "";
+        let labelColor = "";
+        let headerBgColor = "";
+        let watermarkText = "";
+        let watermarkColor = "";
+        let rescheduleIndicator = "";
+        
+        if (isReschedule && isLunas) {
+            // Reschedule + Lunas/Paid = Biru (reschedule) dengan indicator paid
+            labelStatus = "TIKET RESCHEDULE";
+            labelColor = "#007bff"; // Biru untuk reschedule
+            headerBgColor = "#007bff";
+            watermarkText = "PAID";
+            watermarkColor = "rgba(0, 123, 255, 0.15)"; // Watermark biru transparan
+            rescheduleIndicator = `<div style="background: #198754; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">✅ STATUS LUNAS (PAID)</div>`;
+        } else if (isReschedule && !isLunas) {
+            // Reschedule saja (belum lunas) = Biru
+            labelStatus = "TIKET RESCHEDULE";
+            labelColor = "#007bff";
+            headerBgColor = "#007bff";
+            watermarkText = "";
+            watermarkColor = "";
+            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN</div>`;
+        } else if (!isReschedule && isLunas) {
+            // Lunas saja (tanpa reschedule) = Hijau Tua
+            labelStatus = "TIKET LUNAS / PAID";
+            labelColor = "#198754";
+            headerBgColor = "#198754";
+            watermarkText = "PAID";
+            watermarkColor = "rgba(25, 135, 84, 0.2)";
+            rescheduleIndicator = "";
+        } else {
+            // Reservasi normal (DP saja) = Hijau Cerah
+            labelStatus = "RESERVASI BERHASIL!";
+            labelColor = "#28a745";
+            headerBgColor = "#28a745";
+            watermarkText = "";
+            watermarkColor = "";
+            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN</div>`;
+        }
+
+        const successHTML = `
+            <div id="successOverlay">
+                <div id="captureArea" class="ticket-card" style="max-width: 380px; border: none; background: #fff; border-radius:0px; text-align:center;">
+
+                    ${watermarkText ? `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; color: ${watermarkColor}; font-weight: 900; z-index: 0; pointer-events: none;">${watermarkText}</div>` : ''}
+                    
+                    <div style="background:${headerBgColor}; color:#fff; padding:20px;"><h4 style="margin:0; font-weight:800;">${labelStatus}</h4></div>
+                    <div style="padding:25px; background:#fff; color:#333;">
+                        ${rescheduleIndicator}
+                        <p style="margin:0; color:#888; font-size:11px; font-weight:bold;">NOMOR RESERVASI</p>
+                        <h2 style="color:#f37021; font-weight:800; letter-spacing:2px; margin:5px 0;">${bookingID}</h2>
+                        <div style="margin: 10px auto; width: 150px; height: 150px; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden;">
+                            <img src="https://quickchart.io/qr?text=${bookingID}&size=300" crossorigin="anonymous" style="width: 100%; height: 100%; object-fit: contain; padding: 5px;">
+                        </div>                                                
+                        <hr style="border-top:2px dashed #eee; margin: 15px 0;">
+                        <div style="text-align:left; font-size:13px; line-height:2; margin-bottom: 20px;">
+                            <div style="display:flex; justify-content:space-between;"><span>Nama:</span><b>${fullName}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>Tanggal:</span><b>${cantik}</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>Waktu:</span><b>${fixedTime} WIB</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span>Jumlah:</span><b>${paxDetail}</b></div>
+
+                        <div style="display:flex; justify-content:space-between; border-top: 1px dashed #eee; margin-top: 5px; padding-top: 5px;">
+                            <span>${isLunas ? 'Total Bayar:' : 'Panjar:'}</span>
+                            <b style="color: ${isLunas ? '#198754' : '#28a745'};">Rp ${Number(dataInvoice.bayar).toLocaleString('id-ID')}</b>
+                        </div>
+
+                        ${!isLunas ? `
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Sisa Bayar:</span><b style="color: #f37021;">Rp ${Number(dataInvoice.sisa).toLocaleString('id-ID')}</b>
+                        </div>` : `
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Status:</span><b style="color: ${headerBgColor};">LUNAS</b>
+                        </div>`}
+                        </div>
+
+                        <div style="background:#f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 12px; text-align: left;">
+                            <p style="margin:0 0 5px 0; font-size:9px; font-weight:bold; color:#555; text-transform:uppercase;">Syarat & Ketentuan (Disetujui):</p>                            
+                            <ul style="margin:0; padding-left:15px; font-size:8px; color:#777; line-height:1.4;">
+                                <li>Unggah bukti pembayaran untuk konfirmasi.</li>
+                                <li>Hadir 15 menit sebelum jadwal.</li>
+                                <li>Toleransi keterlambatan 30 menit.</li>
+                                <li>Pemesanan slice cake birthday, konfirmasi langsung dikasir.</li>
+                                <li>Dilarang membawa masuk atau membawa keluar makanan/minuman.</li>
+                                <li>Dilarang membawa banner atau umbul-umbul kegiatan.</li>
+                                <li>Pembatalan kurang dari 24 jam dianggap hangus.</li>
+                                <li>Dilarang melakukan aktivitas yang mengganggu tamu lain.</li>
+                            </ul>
+                            <div style="margin-top:8px; border-top:1px solid #eee; padding-top:5px; text-align:right;"><span style="font-size:8px; color:${headerBgColor}; font-weight:bold;">&#10003; CUSTOMER TELAH MENYETUJUI</span></div>                            
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4"><button id="dlAction" class="btn btn-light fw-bold">💾 DOWNLOAD TIKET (PNG)</button></div>
+            </div>`;
+        
+        document.body.insertAdjacentHTML('beforeend', successHTML);
+
+        // Render Canvas & Upload ke Drive
+        // Render canvas and perform upload immediately (so submitReschedule can await completion)
+        let uploadSuccess = false;
+        try {
+            const canvas = await html2canvas(document.querySelector("#captureArea"), { scale: 2, useCORS: true });
+            const tiketBase64 = canvas.toDataURL("image/png").split(',')[1];
+
+            // Jika ini adalah reschedule (termasuk reschedule+paid), upload tiket reschedule ke Drive sekarang
+            if (isReschedule) {
+                // Try primary payload first (includes filename + isLunas)
+                const ticketFileName = generateTicketFileName(bookingID, true, isLunas);
+                let triedResponses = [];
+
+                const tryUpload = async (p) => {
+                    try {
+                        const resp = await Promise.race([fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }), new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 12000))]);
+                        const text = await resp.text();
+                        triedResponses.push(text);
+                        if (text && text.includes('SUCCESS')) return true;
+                        return false;
+                    } catch (err) {
+                        triedResponses.push(err.message);
+                        return false;
+                    }
+                };
+
+                const primaryPayload = { action: "uploadRescheduleTicket", bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isLunas: Boolean(isLunas) };
+                uploadSuccess = await tryUpload(primaryPayload);
+
+                if (!uploadSuccess) {
+                    // Fallback: try minimal payload (older shape)
+                    const fallback1 = { action: "uploadRescheduleTicket", bookingID: bookingID, tiketBase64: tiketBase64 };
+                    uploadSuccess = await tryUpload(fallback1);
+                }
+
+                if (!uploadSuccess) {
+                    // Last resort: try updateTicketDrive action
+                    const fallback2 = { action: "updateTicketDrive", bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isReschedule: true, isLunas: Boolean(isLunas) };
+                    uploadSuccess = await tryUpload(fallback2);
+                }
+
+                if (!uploadSuccess) console.warn('All upload attempts failed for reschedule. Attempts:', triedResponses);
+            } else if (isLunas && !isReschedule) {
+                // Untuk kasus pelunasan biasa (tidak reschedule), upload tiket paid
+                const ticketFileName = generateTicketFileName(bookingID, false, true);
+                const payload = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName };
+                const uploadPromise = fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 8000));
+                try {
+                    const resp = await Promise.race([uploadPromise, timeoutPromise]);
+                    const text = await resp.text();
+                    if (text.includes('SUCCESS')) {
+                        uploadSuccess = true;
+                    } else {
+                        console.warn('Upload paid response:', text);
+                    }
+                } catch (err) {
+                    console.warn('Paid upload failed/timeout:', err.message);
+                }
+            }
+
+            // Setup download button (local only)
+            document.getElementById('dlAction').onclick = function() {
+                const btn = this;
+                const isLunasNow = (dataInvoice.sisa === 0 || dataInvoice.sisa === 'Lunas');
+                const isRescheduleMode = window.ticketStatus.isReschedule;
+
+                btn.disabled = true;
+                btn.innerText = 'MENGUNDUH...';
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = generateTicketFileName(bookingID, isRescheduleMode, isLunasNow);
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                btn.innerText = '✅ BERHASIL DIUNDUH!';
+                btn.disabled = false;
+
+                // Auto refresh page after short delay so state is clean (and user sees success briefly)
+                setTimeout(() => {
+                    window.location.replace(window.location.href);
+                }, 1600);
+            };
+        } catch (err) {
+            console.error('Error in generateSuccessTicket:', err);
+            alert('Error saat render tiket. Silakan refresh dan coba lagi.');
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+        }
+        return uploadSuccess;
+    }
+
+
+    
+    // Global Variable untuk menyimpan data invoice
+    let dataInvoice = { total: 0, bayar: 0, sisa: 0, status: "" };
+
+    function calculateInvoice() {
+        const tanggalInput = document.getElementById('datePicker').value;
+        const paxDewasa = parseInt(document.getElementById('paxDewasa').value) || 0;
+        const paxAnak = parseInt(document.getElementById('paxAnak').value) || 0;
+        const nominalTransfer = parseInt(document.getElementById('nominalTransfer').value) || 0;
+
+        const totalPax = paxDewasa + paxAnak;
+        if(document.getElementById('paxTotal')) {
+            document.getElementById('paxTotal').value = totalPax;
+        }
+        
+        if (!tanggalInput) return;
+
+        // Logika Harga Berdasarkan Tanggal
+        let hargaDewasa = 0;
+        const selectedDate = new Date(tanggalInput);
+        const start1 = new Date('2026-02-20');
+        const end1 = new Date('2026-03-02');
+        const start2 = new Date('2026-03-03');
+        const end2 = new Date('2026-03-19');
+
+        if (selectedDate >= start1 && selectedDate <= end1) {
+            hargaDewasa = 100000;
+        } else if (selectedDate >= start2 && selectedDate <= end2) {
+            hargaDewasa = 150000;
+        } else {
+            hargaDewasa = 100000; // Default
+        }
+
+        const totalHarga = (paxDewasa * hargaDewasa) + (paxAnak * 80000);
+        const minDP = totalHarga * 0.5;
+
+        const sisaHitung = totalHarga - nominalTransfer;
+        dataInvoice.sisa = sisaHitung < 0 ? 0 : sisaHitung;
+
+        // Update UI
+        //document.getElementById('textTotalHarga').innerText = "Total Tagihan: Rp " + totalHarga.toLocaleString();
+        document.getElementById('textMinimalDP').innerText = "Minimal Panjar (50%): Rp " + minDP.toLocaleString();
+
+        // Validasi (tampilkan pesan jika nominal kurang dari minimal DP)
+        if (nominalTransfer < minDP) {
+            document.getElementById('msgErrorDP').innerText = "⚠️ Nominal kurang dari 50%!";
+        } else {
+            document.getElementById('msgErrorDP').innerText = "";
+        }
+
+        // Update Global Data
+        dataInvoice = {
+            total: totalHarga,
+            bayar: nominalTransfer,
+            sisa: totalHarga - nominalTransfer
+        };
+    }
+    
+    document.getElementById('paxDewasa').addEventListener('input', calculateInvoice);
+    document.getElementById('paxAnak').addEventListener('input', calculateInvoice);
+    document.getElementById('datePicker').addEventListener('change', calculateInvoice);
+    // Recalculate invoice on nominal change, then re-check bukti upload to gate submit
+    document.getElementById('nominalTransfer').addEventListener('input', function(){ calculateInvoice(); handleBuktiUpload(); });
+
+    // Handle bukti upload: enable submit only if bukti file exists and nominal >= minimal DP
+    function handleBuktiUpload() {
+        const fileInput = document.getElementById('buktiBayar');
+        const nominal = parseInt(document.getElementById('nominalTransfer').value) || 0;
+        const totalHarga = dataInvoice.total || 0;
+        const minDP = totalHarga * 0.5 || 0;
+        const btnSubmit = document.getElementById('submitBtn');
+
+        if (!fileInput || fileInput.files.length === 0) {
+            btnSubmit.disabled = true;
+            return;
+        }
+
+        if (nominal < minDP) {
+            document.getElementById('msgErrorDP').innerText = "⚠️ Nominal kurang dari 50%!";
+            btnSubmit.disabled = true;
+            return;
+        }
+
+        // File exists and nominal ok
+        document.getElementById('msgErrorDP').innerText = "";
+        btnSubmit.disabled = false;
+    }
+
+    // Handle pelunasan upload: enable confirm button only if bukti file exists
+    function handlePelunasanUpload() {
+        const fileInput = document.getElementById('buktiPelunasanFile');
+        const btnPelunasan = document.getElementById('btnPelunasan');
+
+        if (!fileInput || fileInput.files.length === 0) {
+            btnPelunasan.disabled = true;
+            return;
+        }
+
+        // File exists
+        btnPelunasan.disabled = false;
+    }
+
+    document.getElementById('datePicker').addEventListener('change', async function() {
+        const val = this.value;
+        if(!val) return;
+        window.currentTanggalCantik = getTanggalCantik(val);
+        const selDate = new Date(val);
+        const startDate = new Date("2026-02-20");
+        const endDate = new Date("2026-03-02");
+        currentDewasaPrice = (selDate >= startDate && selDate <= endDate) ? 100000 : 150000;
+        document.getElementById('priceInfo').innerText = `Dewasa: Rp ${currentDewasaPrice.toLocaleString('id-ID')} | Anak: Rp 80.000`;
+        calculateInvoice();
+        if(menuData[val]) {
+            document.getElementById('menuTitle').innerText = menuData[val];
+            document.getElementById('menuDisplay').src = menuImages[menuData[val]];
+            document.getElementById('menuContainer').classList.remove('hidden');
+        }
+        let qBox = document.getElementById('qBox') || createQuotaBox();
+        document.getElementById('qCount').innerText = "Memeriksa...";
+        qBox.style.display = 'block';
+        try {
+            const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "checkQuota", date: val }) });
+            const result = await resp.json();
+            const remaining = 500 - (result.used || 0);
+            if (remaining <= 0) {
+                document.getElementById('qCount').innerText = "FULL BOOK";
+                document.getElementById('qCount').style.color = "#ff4444";
+                document.getElementById('btnNext1').disabled = true;
+            } else {
+                document.getElementById('qCount').innerText = "Pax Tersedia";
+                document.getElementById('qCount').style.color = "#28a745";
+                document.getElementById('btnNext1').disabled = false;
+            }
+        } catch (e) { document.getElementById('qCount').innerText = "Koneksi Bermasalah"; }
+    });
+
+    function createQuotaBox() {
+        document.body.insertAdjacentHTML('beforeend', '<div id="qBox" class="quota-badge-center" onclick="this.style.display=\'none\'"><h6>Status Ketersediaan</h6><h2 id="qCount"></h2><div id="qHint" style="font-size:9px; margin-top:10px; color:#aaa;">(Klik untuk menutup)</div></div>');
+        return document.getElementById('qBox');
+    }
+
+    function getTanggalCantik(dateStr) {
+        if(!dateStr) return "-";
+        const d = new Date(dateStr);
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
+    }
+
+    function checkQuotaAndTerms() {
+        // 1. Ambil tanggal dari ID yang benar
+        const date = document.getElementById('datePicker').value;
+    
+        // 2. Ambil & jumlahkan pax dewasa + anak
+        const dewasa = parseInt(document.getElementById('paxDewasa').value) || 0;
+        const anak = parseInt(document.getElementById('paxAnak').value) || 0;
+        const totalPax = dewasa + anak;
+
+        // 3. Validasi
+        if(!date) {
+            return alert("Mohon pilih Tanggal!");
+        }
+        if(totalPax <= 0) {
+            return alert("Mohon masukkan Jumlah Orang!");
+        }
+
+        // Jika ok, simpan detail pax ke window agar bisa dipakai di tiket nanti
+        window.currentPaxDetail = `${dewasa} Dewasa, ${anak} Anak`;
+    
+        // Tampilkan Modal Syarat & Ketentuan
+        new bootstrap.Modal(document.getElementById('termsModal')).show();
+    }
+
+    function copyVA() {
+        const vaNum = document.getElementById('vaNumber').innerText;
+        const btn = document.getElementById('copyVaBtn');
+        navigator.clipboard.writeText(vaNum).then(() => {
+            if (!btn) return;
+            const prev = btn.innerHTML;
+            btn.classList.remove('btn-dark');
+            btn.classList.add('btn-success');
+            btn.innerText = 'Berhasil disalin';
+            setTimeout(() => {
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-dark');
+                btn.innerHTML = prev;
+            }, 2000);
+        });
+    }
+
+    function downloadQR() {
+        const link = document.createElement('a');
+        link.href = document.getElementById('qrisImg').src;
+        link.download = 'QRIS-Astanarasa.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function showLightbox() { document.getElementById('lightboxImg').src = document.getElementById('menuDisplay').src; new bootstrap.Modal(document.getElementById('imgPreviewModal')).show(); }
+
+    function goToStep(step) {
+        document.querySelectorAll('[id^="step"]').forEach(el => { if(el.id.length <= 5) el.classList.add('hidden'); });
+        document.getElementById('step' + step).classList.remove('hidden');
+        document.querySelectorAll('.step-item').forEach((it, idx) => { if(idx < step) it.classList.add('active'); else it.classList.remove('active'); });
+    }
+
+    function validateStep2() {
+        // 1. Tutup modal terms jika masih terbuka
+        const modalEl = document.getElementById('termsModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        // 2. Ambil data dari form
+        const f = new FormData(document.getElementById('reservationForm'));
+
+        // 3. Pastikan Tanggal Cantik sudah terisi
+        // Jika karena suatu hal kosong, kita ambil ulang dari datePicker
+        if (!window.currentTanggalCantik) {
+            const dateVal = document.getElementById('datePicker').value;
+            window.currentTanggalCantik = getTanggalCantik(dateVal);
+        }    
+    
+        // 4. Update Ringkasan di Step 3 dengan data invoice dan pax yang sudah dihitung
+        if(document.getElementById('totalBayarText')) {
+            document.getElementById('totalBayarText').innerText = "TOTAL: Rp " + dataInvoice.total.toLocaleString('id-ID');
+        }
+
+        const summaryEl = document.getElementById('finalSummary');
+        if(summaryEl) {
+            summaryEl.innerHTML = `
+                <div class="summary-item"><span>Nama</span><b>${f.get('title') || ''} ${f.get('fname') || ''} ${f.get('lname') || ''}</b></div>
+                <div class="summary-item"><span>Waktu</span><b>${window.currentTanggalCantik || '-'} / 17:45 - 20:00 WIB</b></div>
+                <div class="summary-item"><span>Rincian</span><b>${window.currentPaxDetail || '-'}</b></div>
+            `;
+        }
+    
+        // 5. Pindah ke Step 3 (Review & Pembayaran)
+        goToStep(3);
+    }
+
+    document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        window.isReschedule = false;
+        const btn = document.getElementById('submitBtn'); btn.innerText = "MENGIRIM..."; btn.disabled = true;
+        const dateVal = document.getElementById('datePicker').value;
+        const d = new Date(dateVal);
+        const randomChars = Array.from({length: 3}, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
+        const totalPax = document.getElementById('paxTotal').value;
+        const bookingID = `${("0"+d.getDate()).slice(-2)}${("0"+(d.getMonth()+1)).slice(-2)}-${totalPax.padStart(2,'0')}-${randomChars}`;
+        const f = new FormData(e.target);
+
+        await generateSuccessTicket(bookingID, dateVal, `${f.get('title')} ${f.get('fname')} ${f.get('lname')}`, window.currentPaxDetail, false);
+
+        try {
+            const canvas = await html2canvas(document.querySelector("#captureArea"), { scale: 2, useCORS: true });
+            const tiketBase64 = canvas.toDataURL("image/png").split(',')[1];
+            const file = document.getElementById('buktiBayar').files[0];
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                // Generate nama file berdasarkan status tiket pada saat newBooking
+                const ticketFileName = generateTicketFileName(bookingID, false, (Number(dataInvoice.sisa) <= 0));
+                
+                const payload = {
+                    buktiBase64: evt.target.result.split(',')[1],
+                    tiketBase64: tiketBase64,
+                    bookingID: bookingID,
+                    ticketFileName: ticketFileName,  // Kirim nama file ke GS
+                    date: f.get('date'),
+                    pax: window.currentPaxDetail,  // Kirim format lengkap "X Dewasa, Y Anak" untuk display di column E
+                    totalHarga: dataInvoice.total,
+                    bayar: dataInvoice.bayar,  
+                    // Jika sisa <= 0 (langsung lunas), kirimkan teks "Lunas" untuk kolom P
+                    sisa: (Number(dataInvoice.sisa) <= 0 ? "Lunas" : dataInvoice.sisa),
+                    title: f.get('title'), 
+                    fname: f.get('fname'), 
+                    lname: f.get('lname') || "", 
+                    phone: f.get('phone'),
+                    request: f.get('request') || "", 
+                    menuName: menuData[dateVal], 
+                    action: "newBooking"
+                };
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            };
+            reader.readAsDataURL(file);
+        } catch (err) { console.error(err); }
+    });
+
+    async function processPelunasan() {
+        const fileInput = document.getElementById('buktiPelunasanFile');        
+        const id = document.getElementById('resID').value;
+
+        if (fileInput.files.length === 0) return alert("Silakan unggah bukti transfer pelunasan!");
+        if (fileInput.files[0].size > 2 * 1024 * 1024) { // Batas 2MB
+            return alert("Ukuran file terlalu besar! Maksimal 2MB agar proses cepat.");
+        }
+        if (!confirm("Konfirmasi pelunasan untuk ID: " + id + "?")) return;
+
+        const btn = document.getElementById('btnPelunasan');
+        btn.disabled = true;
+        btn.innerText = "SEDANG MEMPROSES...";
+        document.getElementById('loader').style.display = 'flex';
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = async function(e) {
+            const base64 = e.target.result.split(',')[1];
+            const payload = {
+                action: "settlePayment",
+                bookingID: id,
+                buktiBase64: base64
+            };
+
+            try {
+                const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await resp.text();
+            
+                if (result.includes("SUCCESS")) {
+                    // 1. Update data invoice di browser agar 'Sisa' jadi 0
+                    dataInvoice.bayar = Number(dataInvoice.bayar) + Number(dataInvoice.sisa);
+                    dataInvoice.sisa = 0;
+
+                    // 2. Beri notifikasi
+                    alert("Pembayaran Lunas Berhasil Diverifikasi!");
+
+                    // 3. Pemicu Tiket Lunas
+                    // Gunakan window.rescheduleCount untuk menentukan apakah booking telah direschedule
+                    // Jika rescheduleCount >= 1, maka tiket bernama Tiket-(ID)-Reschedule-Paid.png
+                    // Jika rescheduleCount == 0, maka tiket bernama Tiket-(ID)-Paid.png
+                    const isAlreadyRescheduled = (window.rescheduleCount && window.rescheduleCount >= 1) ? true : false;
+                    generateSuccessTicket(
+                        document.getElementById('resID').value, // ID Booking
+                        tempResData.oldDateRaw,                 // Tanggal
+                        tempResData.name,                        // Nama
+                        tempResData.paxDetail,                   // Detail Pax
+                        isAlreadyRescheduled                     // isReschedule = true hanya jika sudah reschedule sebelumnya
+                    );
+
+                } else {
+                    alert("Gagal: " + result);
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan koneksi.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "✅ KONFIRMASI PELUNASAN";
+                document.getElementById('loader').style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
+</body>
+</html>
