@@ -128,12 +128,12 @@
                     </div>
                 </div>
                 <div class="row g-2 mb-3">
-                    <div class="col-6"><label class="form-label">Nama Depan*</label><input type="text" name="fname" class="form-control" required></div>
+                    <div class="col-6"><label class="form-label">Nama Depan*</label><input type="text" name="fname" id="fnameInput" class="form-control" required oninput="checkFormStep2()"></div>
                     <div class="col-6"><label class="form-label">Nama Belakang</label><input type="text" name="lname" class="form-control"></div>
                 </div>
-                <div class="mb-3"><label class="form-label">WhatsApp*</label><input type="tel" name="phone" class="form-control" value="+62" required></div>                
+                <div class="mb-3"><label class="form-label">WhatsApp*</label><input type="tel" name="phone" id="phoneInput" class="form-control" value="+62" required oninput="checkFormStep2()"></div>                
                 <div class="mb-4"><label class="form-label">Permintaan Khusus<span style="font-size: 0.7rem; font-weight: 400; color: #aaa; text-transform: none; margin-left: 5px;">(Sesuai ketersediaan)</span></label><textarea name="request" class="form-control" rows="3" placeholder="Contoh : Birthday Surprise..." style="min-height: 80px;"></textarea></div>
-                <button type="button" class="btn-primary-custom" onclick="validateStep2()">KONFIRMASI PESANAN</button>
+                <button type="button" class="btn-primary-custom" id="confirmOrderBtn" onclick="validateStep2()" disabled>KONFIRMASI PESANAN</button>
             </div>
 
             <div id="step3" class="hidden text-dark">
@@ -178,7 +178,16 @@
                     <small class="text-muted d-block mt-2">Format: JPG, PNG (Max 2MB)</small>
                 </div>                
                 <button type="submit" class="btn-primary-custom" id="submitBtn" disabled>KIRIM RESERVASI</button>
-            </div>
+            </div> <div style="margin-top: -5px; border-top: 1px solid #eee; padding-top: 5px;">
+                <div class="d-flex align-items-center justify-content-center gap-2" 
+                     onclick="hubungiAdmin()" 
+                     style="cursor: pointer; padding: 5px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20" height="20">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #555;">
+                        Butuh bantuan? <span style="color: #25d366; text-decoration: underline;">Chat Admin</span>
+                    </span>
+                </div>
+            </div>           
         </form>
     </div>
 </div>
@@ -298,6 +307,20 @@
     const menuData = { "2026-02-19": "Menu A", "2026-02-20": "Menu B", "2026-02-21": "Menu C", "2026-02-22": "Menu D", "2026-02-23": "Menu E", "2026-02-24": "Menu F", "2026-02-25": "Menu G", "2026-02-26": "Menu H", "2026-02-27": "Menu I", "2026-02-28": "Menu J", "2026-03-01": "Menu A", "2026-03-02": "Menu B", "2026-03-03": "Menu C", "2026-03-04": "Menu D", "2026-03-05": "Menu E", "2026-03-06": "Menu F", "2026-03-07": "Menu G", "2026-03-08": "Menu H", "2026-03-09": "Menu I", "2026-03-10": "Menu J", "2026-03-11": "Menu A", "2026-03-12": "Menu B", "2026-03-13": "Menu C", "2026-03-14": "Menu D", "2026-03-15": "Menu E", "2026-03-16": "Menu F", "2026-03-17": "Menu G", "2026-03-18": "Menu H", "2026-03-19": "Menu I" };
     const menuImages = { "Menu A": "asset/img/menu-a.jpg", "Menu B": "asset/img/menu-b.jpg", "Menu C": "asset/img/menu-c.jpg", "Menu D": "asset/img/menu-d.jpg", "Menu E": "asset/img/menu-e.jpg", "Menu F": "asset/img/menu-f.jpg", "Menu G": "asset/img/menu-g.jpg", "Menu H": "asset/img/menu-h.jpg", "Menu I": "asset/img/menu-i.jpg", "Menu J": "asset/img/menu-j.jpg" };
     const formatIDR = (val) => "Rp " + Number(val).toLocaleString('id-ID');
+
+    // Validasi form step2: cek nama depan dan nomor telepon
+    function checkFormStep2() {
+        const fname = document.getElementById('fnameInput').value.trim();
+        const phone = document.getElementById('phoneInput').value.trim();
+        const btn = document.getElementById('confirmOrderBtn');
+        
+        // Tombol aktif hanya jika kedua field terisi (nama depan minimal 1 karakter, phone bukan hanya +62)
+        if (fname.length > 0 && phone.length > 3) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }
 
     // Formatter for nominal input (adds `Rp ` and thousand separators)
     function formatRupiahInput(value) {
@@ -1208,6 +1231,30 @@
         };
         reader.readAsDataURL(file);
     }
+
+    function hubungiAdmin() {
+        const nomorAdmin = "6281119122266"; // Ganti dengan nomor Admin Anda
+        let pesan = "";
+
+        // Cek user sedang di step mana
+        if (!document.getElementById('step1').classList.contains('hidden')) {
+            pesan = "Halo Admin Astanarasa, saya bingung saat memilih tanggal dan paket di Step 1. Mohon bantuannya.";
+        } else if (!document.getElementById('step2').classList.contains('hidden')) {
+            const namaUser = document.getElementById('fnameInput').value;
+            pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya sedang mengisi data diri di Step 2 tapi ada kendala.`;
+        } else if (!document.getElementById('step3').classList.contains('hidden')) {
+            pesan = "Halo Admin Astanarasa, saya sudah sampai di tahap pembayaran (Step 3). Ingin konfirmasi mengenai transfer.";
+        } else {
+            pesan = "Halo Admin Astanarasa, saya butuh bantuan mengenai reservasi.";
+        }
+
+        // Encode pesan agar bisa dibaca URL
+        const url = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+    
+        // Buka WhatsApp di tab baru
+        window.open(url, '_blank');
+    }
+
 </script>
 </body>
 </html>
