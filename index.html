@@ -145,7 +145,7 @@
                     <p class="small fw-bold text-muted mb-3">PILIH METODE PEMBAYARAN</p>
                     <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
                         <li class="nav-item"><button class="nav-link btn-sm" id="tab-qris" data-bs-toggle="pill" data-bs-target="#pay-qris" type="button" disabled style="opacity: 0.5; cursor: not-allowed;">QRIS (Off)</button></li>
-                        <li class="nav-item"><button class="nav-link active btn-sm" id="tab-va" data-bs-toggle="pill" data-bs-target="#pay-va" type="button">Transfer VA</button></li>
+                        <li class="nav-item"><button class="nav-link active btn-sm" id="tab-va" data-bs-toggle="pill" data-bs-target="#pay-va" type="button">Transfer</button></li>
                     </ul>
                     
                     <div class="tab-content border-top pt-3">
@@ -155,9 +155,9 @@
                         </div>
                         <div class="tab-pane fade show active" id="pay-va">
                             <div class="p-3 bg-light rounded border mb-3" style="text-align: center;">
-                                <p class="mb-2 text-muted" style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">BANK MANDIRI (VA)</p>
-                                <h4 class="fw-bold mb-3" id="vaNumber" style="letter-spacing: 2px; color: #f37021;">889081234567890</h4>
-                                            <button id="copyVaBtn" type="button" class="btn btn-dark w-100 fw-bold" style="font-size: 0.9rem; min-height: 45px;" onclick="copyVA()">📋 Salin No. VA</button>
+                                <p class="mb-2 text-muted" style="font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">BANK MANDIRI</p>
+                                <h4 class="fw-bold mb-3" id="vaNumber" style="letter-spacing: 2px; color: #f37021;">1010069909909</h4>
+                                            <button id="copyVaBtn" type="button" class="btn btn-dark w-100 fw-bold" style="font-size: 0.9rem; min-height: 45px;" onclick="copyVA()">📋 Salin No. Rek.</button>
                             </div>
                             <p style="font-size: 0.8rem; color: #888; text-align: center;">*Pastikan nominal transfer sesuai dengan total bayar</p>
                         </div>
@@ -168,7 +168,7 @@
                 <div class="alert alert-warning mt-3"><p id="textMinimalDP" class="text-danger mb-0 fw-bold" style="font-size: 0.95rem;">Minimal Panjar (50%): Rp 0</p></div>
                 <div class="mb-4">
                     <label class="form-label">Nominal Transfer</label>
-                    <input type="number" class="form-control" id="nominalTransfer" oninput="calculateInvoice()" placeholder="Contoh: 500000">
+                    <input type="text" inputmode="numeric" class="form-control" id="nominalTransfer" placeholder="Rp 0">
                     <small id="msgErrorDP" class="text-danger font-weight-bold d-block mt-2"></small>
                 </div>
 
@@ -188,14 +188,16 @@
         <div class="modal-content text-dark" style="border-radius: 12px;">
             <div class="modal-header border-0 py-3"><h6 class="modal-title fw-bold">Syarat & Ketentuan</h6></div>
             <div class="modal-body py-3" style="font-size: 0.8rem; max-height: 60vh; overflow-y: auto;">
-                <p class="mb-2">1. Unggah bukti pembayaran untuk konfirmasi.</p>
-                <p class="mb-2">2. Hadir 15 menit sebelum jadwal.</p>
-                <p class="mb-2">3. Toleransi keterlambatan 30 menit.</p>
-                <p class="mb-2">4. Pemesanan slice cake birthday, konfirmasi langsung dikasir.</p>
-                <p class="mb-2">5. Dilarang membawa masuk atau membawa keluar makanan/minuman.</p>
-                <p class="mb-2">6. Dilarang membawa banner atau umbul-umbul kegiatan.</p>
-                <p class="mb-2">7. Pembatalan kurang dari 24 jam dianggap hangus.</p>
-                <p class="mb-0">8. Dilarang melakukan aktivitas yang mengganggu tamu lain.</p>
+                <p class="mb-2">1. Pembayaran hanya dilakukan via transfer.</p>
+                <p class="mb-2">2. Unggah bukti pembayaran untuk konfirmasi.</p>                
+                <p class="mb-2">3. Pembatalan, tidak ada pengembalian dana.</p>
+                <p class="mb-2">4. Umur 0 - 5 tahun tidak dikenakan biaya, 6 - 11 tahun kategori anak.</p>
+                <p class="mb-2">5. Hadir 15 menit sebelum jadwal.</p>
+                <p class="mb-2">6. Toleransi keterlambatan 30 menit.</p>
+                <p class="mb-2">7. Pemesanan slice cake birthday, konfirmasi langsung dikasir.</p>
+                <p class="mb-2">8. Dilarang membawa masuk atau membawa keluar makanan/minuman.</p>
+                <p class="mb-2">9. Dilarang membawa banner atau umbul-umbul kegiatan.</p>                
+                <p class="mb-0">10. Dilarang melakukan aktivitas yang mengganggu tamu lain.</p>
             </div>
             <div class="modal-footer flex-column py-3 border-top">
                 <div class="form-check w-100 mb-3">
@@ -296,6 +298,39 @@
     const menuData = { "2026-02-19": "Menu A", "2026-02-20": "Menu B", "2026-02-21": "Menu C", "2026-02-22": "Menu D", "2026-02-23": "Menu E", "2026-02-24": "Menu F", "2026-02-25": "Menu G", "2026-02-26": "Menu H", "2026-02-27": "Menu I", "2026-02-28": "Menu J", "2026-03-01": "Menu A", "2026-03-02": "Menu B", "2026-03-03": "Menu C", "2026-03-04": "Menu D", "2026-03-05": "Menu E", "2026-03-06": "Menu F", "2026-03-07": "Menu G", "2026-03-08": "Menu H", "2026-03-09": "Menu I", "2026-03-10": "Menu J", "2026-03-11": "Menu A", "2026-03-12": "Menu B", "2026-03-13": "Menu C", "2026-03-14": "Menu D", "2026-03-15": "Menu E", "2026-03-16": "Menu F", "2026-03-17": "Menu G", "2026-03-18": "Menu H", "2026-03-19": "Menu I" };
     const menuImages = { "Menu A": "asset/img/menu-a.jpg", "Menu B": "asset/img/menu-b.jpg", "Menu C": "asset/img/menu-c.jpg", "Menu D": "asset/img/menu-d.jpg", "Menu E": "asset/img/menu-e.jpg", "Menu F": "asset/img/menu-f.jpg", "Menu G": "asset/img/menu-g.jpg", "Menu H": "asset/img/menu-h.jpg", "Menu I": "asset/img/menu-i.jpg", "Menu J": "asset/img/menu-j.jpg" };
     const formatIDR = (val) => "Rp " + Number(val).toLocaleString('id-ID');
+
+    // Formatter for nominal input (adds `Rp ` and thousand separators)
+    function formatRupiahInput(value) {
+        const nums = (value || '').toString().replace(/[^0-9]/g, '');
+        if (!nums) return '';
+        return 'Rp ' + Number(nums).toLocaleString('id-ID');
+    }
+
+    function getNominalNumber() {
+        const el = document.getElementById('nominalTransfer');
+        if (!el) return 0;
+        const nums = (el.value || '').toString().replace(/[^0-9]/g, '');
+        return nums ? Number(nums) : 0;
+    }
+
+    (function setupNominalFormatter(){
+        const input = document.getElementById('nominalTransfer');
+        if (!input) return;
+        input.addEventListener('input', function () {
+            const caretToEnd = this.value.length - (this.selectionStart || 0);
+            this.value = formatRupiahInput(this.value);
+            const pos = this.value.length - Math.max(0, caretToEnd);
+            try { this.setSelectionRange(pos, pos); } catch (e) {}
+            // keep invoice calculation and upload check in sync
+            try { calculateInvoice(); handleBuktiUpload(); } catch (e) {}
+        });
+        input.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+            this.value = formatRupiahInput(text);
+            try { calculateInvoice(); handleBuktiUpload(); } catch (e) {}
+        });
+    })();
 
     let currentDewasaPrice = 150000; 
     const hargaAnak = 80000;
@@ -657,13 +692,15 @@
                         <div style="background:#f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 12px; text-align: left;">
                             <p style="margin:0 0 5px 0; font-size:9px; font-weight:bold; color:#555; text-transform:uppercase;">Syarat & Ketentuan (Disetujui):</p>                            
                             <ul style="margin:0; padding-left:15px; font-size:8px; color:#777; line-height:1.4;">
+                                <li>Pembayaran hanya dilakukan via transfer.</li>
                                 <li>Unggah bukti pembayaran untuk konfirmasi.</li>
+                                <li>Pembatalan, tidak ada pengembalian dana.</li>
+                                <li>Umur 0 - 5 tahun tidak dikenakan biaya, 6 - 11 tahun kategori anak.</li>
                                 <li>Hadir 15 menit sebelum jadwal.</li>
                                 <li>Toleransi keterlambatan 30 menit.</li>
                                 <li>Pemesanan slice cake birthday, konfirmasi langsung dikasir.</li>
                                 <li>Dilarang membawa masuk atau membawa keluar makanan/minuman.</li>
-                                <li>Dilarang membawa banner atau umbul-umbul kegiatan.</li>
-                                <li>Pembatalan kurang dari 24 jam dianggap hangus.</li>
+                                <li>Dilarang membawa banner atau umbul-umbul kegiatan.</li>                                
                                 <li>Dilarang melakukan aktivitas yang mengganggu tamu lain.</li>
                             </ul>
                             <div style="margin-top:8px; border-top:1px solid #eee; padding-top:5px; text-align:right;"><span style="font-size:8px; color:${headerBgColor}; font-weight:bold;">&#10003; CUSTOMER TELAH MENYETUJUI</span></div>                            
@@ -803,7 +840,7 @@
         const tanggalInput = document.getElementById('datePicker').value;
         const paxDewasa = parseInt(document.getElementById('paxDewasa').value) || 0;
         const paxAnak = parseInt(document.getElementById('paxAnak').value) || 0;
-        const nominalTransfer = parseInt(document.getElementById('nominalTransfer').value) || 0;
+        const nominalTransfer = getNominalNumber() || 0;
 
         const totalPax = paxDewasa + paxAnak;
         if(document.getElementById('paxTotal')) {
@@ -856,13 +893,11 @@
     document.getElementById('paxDewasa').addEventListener('input', calculateInvoice);
     document.getElementById('paxAnak').addEventListener('input', calculateInvoice);
     document.getElementById('datePicker').addEventListener('change', calculateInvoice);
-    // Recalculate invoice on nominal change, then re-check bukti upload to gate submit
-    document.getElementById('nominalTransfer').addEventListener('input', function(){ calculateInvoice(); handleBuktiUpload(); });
 
     // Handle bukti upload: enable submit only if bukti file exists and nominal >= minimal DP
     function handleBuktiUpload() {
         const fileInput = document.getElementById('buktiBayar');
-        const nominal = parseInt(document.getElementById('nominalTransfer').value) || 0;
+        const nominal = getNominalNumber() || 0;
         const totalHarga = dataInvoice.total || 0;
         const minDP = totalHarga * 0.5 || 0;
         const btnSubmit = document.getElementById('submitBtn');
