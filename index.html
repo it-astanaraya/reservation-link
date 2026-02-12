@@ -87,7 +87,7 @@
 <div class="container">
     <div class="main-card">
         <div class="header-banner">
-            <h2>ASTANARASA RESTO & DINE</h2>
+            <h2>ASTANARASA RESTO & DINING</h2>
             <img src="asset/img/header-landscape.jpg" class="header-img">
         </div>
         <div class="stepper-wrapper">
@@ -198,15 +198,16 @@
             <div class="modal-header border-0 py-3"><h6 class="modal-title fw-bold">Syarat & Ketentuan</h6></div>
             <div class="modal-body py-3" style="font-size: 0.8rem; max-height: 60vh; overflow-y: auto;">
                 <p class="mb-2">1. Pembayaran hanya dilakukan via transfer.</p>
-                <p class="mb-2">2. Unggah bukti pembayaran untuk konfirmasi.</p>                
-                <p class="mb-2">3. Pembatalan, tidak ada pengembalian dana.</p>
-                <p class="mb-2">4. Umur 0 - 5 tahun tidak dikenakan biaya, 6 - 11 tahun kategori anak.</p>
-                <p class="mb-2">5. Hadir 15 menit sebelum jadwal.</p>
-                <p class="mb-2">6. Toleransi keterlambatan 30 menit.</p>
-                <p class="mb-2">7. Pemesanan slice cake birthday, konfirmasi langsung dikasir.</p>
-                <p class="mb-2">8. Dilarang membawa masuk atau membawa keluar makanan/minuman.</p>
-                <p class="mb-2">9. Dilarang membawa banner atau umbul-umbul kegiatan.</p>                
-                <p class="mb-0">10. Dilarang melakukan aktivitas yang mengganggu tamu lain.</p>
+                <p class="mb-2">2. Melakukan pelunasan paling lambat H-1 sebelum acara.</p>
+                <p class="mb-2">3. Unggah bukti pembayaran untuk konfirmasi.</p>                
+                <p class="mb-2">4. Pembatalan, tidak ada pengembalian dana.</p>
+                <p class="mb-2">5. Umur 0 - 5 tahun tidak dikenakan biaya, 6 - 11 tahun kategori anak.</p>
+                <p class="mb-2">6. Hadir 15 menit sebelum jadwal.</p>
+                <p class="mb-2">7. Toleransi keterlambatan 30 menit.</p>
+                <p class="mb-2">8. Pemesanan slice cake birthday, konfirmasi langsung dikasir.</p>
+                <p class="mb-2">9. Dilarang membawa masuk atau membawa keluar makanan/minuman.</p>
+                <p class="mb-2">10. Dilarang membawa banner atau umbul-umbul kegiatan.</p>                
+                <p class="mb-0">11. Dilarang melakukan aktivitas yang mengganggu tamu lain.</p>
             </div>
             <div class="modal-footer flex-column py-3 border-top">
                 <div class="form-check w-100 mb-3">
@@ -538,7 +539,7 @@
         // Set min/max date untuk reschedule
         const dateInput = document.getElementById('newDate');
         if(packageInfo.isPromo) {
-            dateInput.min = "2026-02-19";
+            dateInput.min = "2026-02-20";
             dateInput.max = "2026-03-02";
         } else {
             dateInput.min = "2026-03-03";
@@ -658,7 +659,7 @@
             headerBgColor = "#007bff";
             watermarkText = "";
             watermarkColor = "";
-            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN</div>`;
+            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN H-1</div>`;
         } else if (!isReschedule && isLunas) {
             // Lunas saja (tanpa reschedule) = Hijau Tua
             labelStatus = "TIKET LUNAS / PAID";
@@ -674,7 +675,7 @@
             headerBgColor = "#28a745";
             watermarkText = "";
             watermarkColor = "";
-            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN</div>`;
+            rescheduleIndicator = `<div style="background: #f37021; color: #fff; padding: 8px; font-size: 11px; font-weight: bold; margin-bottom: 10px; border-radius: 4px;">⏳ MENUNGGU PELUNASAN H-1</div>`;
         }
 
         const successHTML = `
@@ -716,6 +717,7 @@
                             <p style="margin:0 0 5px 0; font-size:9px; font-weight:bold; color:#555; text-transform:uppercase;">Syarat & Ketentuan (Disetujui):</p>                            
                             <ul style="margin:0; padding-left:15px; font-size:8px; color:#777; line-height:1.4;">
                                 <li>Pembayaran hanya dilakukan via transfer.</li>
+                                <li>Melakukan pelunasan paling lambat H-1 sebelum acara.</li>
                                 <li>Unggah bukti pembayaran untuk konfirmasi.</li>
                                 <li>Pembatalan, tidak ada pengembalian dana.</li>
                                 <li>Umur 0 - 5 tahun tidak dikenakan biaya, 6 - 11 tahun kategori anak.</li>
@@ -875,7 +877,7 @@
         // Logika Harga Berdasarkan Tanggal
         let hargaDewasa = 0;
         const selectedDate = new Date(tanggalInput);
-        const start1 = new Date('2026-02-20');
+        const start1 = new Date('2026-02-19');
         const end1 = new Date('2026-03-02');
         const start2 = new Date('2026-03-03');
         const end2 = new Date('2026-03-19');
@@ -1233,32 +1235,38 @@
     }
 
     function hubungiAdmin() {
-        const nomorAdmin = "6281119122266"; // Ganti dengan nomor Admin Anda
+        const nomorAdmin = "6281119122266"; // GANTI DENGAN NOMOR ANDA
         let pesan = "";
 
-        // Cek user sedang di step mana
-        if (!document.getElementById('step1').classList.contains('hidden')) {
-            pesan = "Halo Admin Astanarasa, saya bingung saat memilih tanggal dan paket di Step 1. Mohon bantuannya.";
-        } else if (!document.getElementById('step2').classList.contains('hidden')) {
-            const namaUser = document.getElementById('fnameInput').value;
-            pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya sedang mengisi data diri di Step 2 tapi ada kendala.`;
-        } else if (!document.getElementById('step3').classList.contains('hidden')) {
-            pesan = "Halo Admin Astanarasa, saya sudah sampai di tahap pembayaran (Step 3). Ingin konfirmasi mengenai transfer.";
-        } else {
-            pesan = "Halo Admin Astanarasa, saya butuh bantuan mengenai reservasi.";
+        // 1. Ambil data pendukung dari form
+        const tanggal = document.getElementById('datePicker').value;
+        const namaUser = document.getElementById('fnameInput') ? document.getElementById('fnameInput').value : "";
+        const telpUser = document.getElementById('phoneInput') ? document.getElementById('phoneInput').value : "";
+
+        // 2. Deteksi Step yang sedang aktif (tidak memiliki class 'hidden')
+        const step1Aktif = !document.getElementById('step1').classList.contains('hidden');
+        const step2Aktif = !document.getElementById('step2').classList.contains('hidden');
+        const step3Aktif = !document.getElementById('step3').classList.contains('hidden');
+
+        // 3. Logika Pesan Dinamis
+        if (step1Aktif) {
+            pesan = `Halo Admin Astanarasa, saya ingin bertanya mengenai reservasi untuk tanggal: ${tanggal || '(Belum pilih tanggal)'}.`;
+        } 
+        else if (step2Aktif) {
+            pesan = `Halo Admin Astanarasa, saya ${namaUser} (${telpUser}). Saya sedang mengisi data diri untuk tanggal ${tanggal}, tapi ada kendala di Step 2.`;
+        } 
+        else if (step3Aktif) {
+            pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya sudah di tahap pembayaran untuk reservasi tanggal ${tanggal}. Ingin konfirmasi mengenai transfer/bukti bayar.`;
+        } 
+        else {
+            pesan = "Halo Admin Astanarasa, saya butuh bantuan mengenai reservasi di website.";
         }
 
-        // Encode pesan agar bisa dibaca URL
+        // 4. Eksekusi Kirim ke WhatsApp
         const url = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
-    
-        // Buka WhatsApp di tab baru
-        window.open(url, '_blank');
+        window.location.href = url;
     }
 
 </script>
 </body>
 </html>
-
-
-
-
