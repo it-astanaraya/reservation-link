@@ -960,7 +960,7 @@
         if(!val) return;
         window.currentTanggalCantik = getTanggalCantik(val);
         const selDate = new Date(val);
-        const startDate = new Date("2026-02-20");
+        const startDate = new Date("2026-02-19");
         const endDate = new Date("2026-03-02");
         currentDewasaPrice = (selDate >= startDate && selDate <= endDate) ? 100000 : 150000;
         document.getElementById('priceInfo').innerText = `Dewasa: Rp ${currentDewasaPrice.toLocaleString('id-ID')} | Anak: Rp 80.000`;
@@ -1258,6 +1258,7 @@
 </script>
 </body>
 </html>
+
 
 
 
