@@ -307,6 +307,18 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxniTvvkLhnv8_ABVIocDajjxuLQ3ZrgmOUXDXWYH4I5Xv9_KvAIyuElRW6Kr-31X8yqA/exec'; 
     const menuData = { "2026-02-19": "Menu A", "2026-02-20": "Menu B", "2026-02-21": "Menu C", "2026-02-22": "Menu D", "2026-02-23": "Menu E", "2026-02-24": "Menu F", "2026-02-25": "Menu G", "2026-02-26": "Menu H", "2026-02-27": "Menu I", "2026-02-28": "Menu J", "2026-03-01": "Menu A", "2026-03-02": "Menu B", "2026-03-03": "Menu C", "2026-03-04": "Menu D", "2026-03-05": "Menu E", "2026-03-06": "Menu F", "2026-03-07": "Menu G", "2026-03-08": "Menu H", "2026-03-09": "Menu I", "2026-03-10": "Menu J", "2026-03-11": "Menu A", "2026-03-12": "Menu B", "2026-03-13": "Menu C", "2026-03-14": "Menu D", "2026-03-15": "Menu E", "2026-03-16": "Menu F", "2026-03-17": "Menu G", "2026-03-18": "Menu H", "2026-03-19": "Menu I" };
     const menuImages = { "Menu A": "asset/img/menu-a.jpg", "Menu B": "asset/img/menu-b.jpg", "Menu C": "asset/img/menu-c.jpg", "Menu D": "asset/img/menu-d.jpg", "Menu E": "asset/img/menu-e.jpg", "Menu F": "asset/img/menu-f.jpg", "Menu G": "asset/img/menu-g.jpg", "Menu H": "asset/img/menu-h.jpg", "Menu I": "asset/img/menu-i.jpg", "Menu J": "asset/img/menu-j.jpg" };
+    // Daftar tanggal yang ingin dinonaktifkan (format: YYYY-MM-DD)
+    // Anda bisa mengubah atau menambahkan tanggal apa saja di array ini.
+    const disabledDates = [
+        // contoh:
+        '2026-02-28', '2026-03-01'
+    ];
+
+    function isDateDisabled(dateStr) {
+        if (!dateStr) return false;
+        return disabledDates.indexOf(dateStr) !== -1;
+    }
+
     const formatIDR = (val) => "Rp " + Number(val).toLocaleString('id-ID');
 
     // Validasi form step2: cek nama depan dan nomor telepon
@@ -874,6 +886,17 @@
         
         if (!tanggalInput) return;
 
+        // Cegah pemilihan tanggal yang dinonaktifkan
+        if (isDateDisabled(tanggalInput)) {
+            document.getElementById('priceInfo').innerText = "Tanggal ini tidak tersedia. Silakan pilih tanggal lain.";
+            const btnNext = document.getElementById('btnNext1');
+            if (btnNext) {
+                btnNext.disabled = true;
+                btnNext.style.opacity = '0.5';
+            }
+            return;
+        }
+
         // Logika Harga Berdasarkan Tanggal
         let hargaDewasa = 0;
         const selectedDate = new Date(tanggalInput);
@@ -959,6 +982,18 @@
 
     document.getElementById('datePicker').addEventListener('change', async function() {
         const val = this.value;
+        // Jika tanggal termasuk dalam daftar non-aktif, tolak pilihan
+        if (isDateDisabled(val)) {
+            alert('Mohon Maaf, tanggal tersebut sudah full. Silakan pilih tanggal lain.');
+            this.value = '';
+            document.getElementById('priceInfo').innerText = 'Tanggal tidak tersedia';
+            const btnNext = document.getElementById('btnNext1');
+            if (btnNext) {
+                btnNext.disabled = true;
+                btnNext.style.opacity = '0.5';
+            }
+            return;
+        }
         if(!val) return;
         window.currentTanggalCantik = getTanggalCantik(val);
         const selDate = new Date(val);
@@ -1022,6 +1057,18 @@
         document.body.insertAdjacentHTML('beforeend', '<div id="qBox" class="quota-badge-center" onclick="this.style.display=\'none\'"><h6>Status Ketersediaan</h6><h2 id="qCount"></h2><div id="qHint" style="font-size:9px; margin-top:10px; color:#aaa;">(Klik untuk menutup)</div></div>');
         return document.getElementById('qBox');
     }
+
+    // Validasi untuk input reschedule `newDate` agar tidak memilih tanggal yang dinonaktifkan
+    (function setupRescheduleDateValidation(){
+        const newDateEl = document.getElementById('newDate');
+        if (!newDateEl) return;
+        newDateEl.addEventListener('change', function(){
+            if (isDateDisabled(this.value)) {
+                alert('Maaf, tanggal yang dipilih tidak tersedia untuk reschedule.');
+                this.value = '';
+            }
+        });
+    })();
 
     function getTanggalCantik(dateStr) {
         if(!dateStr) return "-";
