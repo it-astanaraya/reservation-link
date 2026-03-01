@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
         :root { --accent-color: #f37021; --bg-dark: #3b3b3b; --card-white: #ffffff; }
@@ -40,11 +42,52 @@
         .quota-badge-center h6 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; color: #ccc; }
         .quota-badge-center h2 { font-size: 2rem; font-weight: 800; margin: 0; color: #28a745; }
         .summary-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 0.95rem; }
-        #successOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; overflow-y:auto; }
+        #successOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15px; overflow-y:auto; }
         .ticket-card { background:#fff; color:#333; width:100%; max-width:350px; border-radius:0px; overflow:visible !important; position:relative; text-align:center; display:block; height:auto; }
         .modal-portrait { max-width: 100%; margin: auto; }
         #loader { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; justify-content:center; align-items:center; }
         .alert { border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        /* Class utama untuk tombol bantuan manual */
+        .btn-blink {
+            animation: pulse-red 1.5s infinite;
+            background-color: #dc3545 !important; /* Warna Merah Standar Danger */
+            color: white !important;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer !important;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            pointer-events: auto !important;
+            transition: background 0.3s ease;
+            z-index: 9999; /* Pastikan di atas elemen lain */
+        }
+
+        .btn-blink:hover {
+            background-color: #c82333 !important;
+            transform: translateY(-2px);
+        }
+
+        /* Styling tambahan untuk wadah pesan error agar rapi */
+        .alert-ocr-fail {
+            background-color: #fff5f5;
+            border: 1px solid #feb2b2;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
         
         /* Mobile Optimization */
         @media (max-width: 480px) {
@@ -174,11 +217,14 @@
 
                 <div class="mb-4">
                     <label class="form-label text-danger fw-bold">Upload Bukti Pembayaran*</label>
-                    <input type="file" id="buktiBayar" class="form-control" accept="image/*" required onchange="handleBuktiUpload()" style="height: 50px; font-size: 0.95rem;">
-                    <small class="text-muted d-block mt-2">Format: JPG, PNG (Max 2MB)</small>
-                </div>                
-                <button type="submit" class="btn-primary-custom" id="submitBtn" disabled>KIRIM RESERVASI</button>
-            </div> <div style="margin-top: -5px; border-top: 1px solid #eee; padding-top: 5px;">
+                    <input type="file" id="buktiBayar" class="form-control" accept="image/*" required onchange="handleBuktiUpload()" style="height: 50px; font-size: 0.95rem; display: block; margin-left: auto; margin-right: auto;">
+                    <small class="text-muted d-block mt-2" style="text-align: center;">Format: JPG, PNG (Max 2MB)</small>
+                </div>
+                <div class="mb-4">
+                    <button type="submit" class="btn-primary-custom" id="submitBtn" disabled>KIRIM RESERVASI</button>
+                </div>
+            </div>
+            <div style="margin-top: -5px; border-top: 1px solid #eee; padding-top: 5px;">
                 <div class="d-flex align-items-center justify-content-center gap-2" 
                      onclick="hubungiAdmin()" 
                      style="cursor: pointer; padding: 5px;">
@@ -287,13 +333,15 @@
 
                     <div class="mb-4">
                         <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #333;">Upload Bukti Pelunasan*</label>
-                        <input type="file" id="buktiPelunasanFile" class="form-control" accept="image/*" onchange="handlePelunasanUpload()" style="padding: 12px; font-size: 16px; height: auto; border-radius: 8px;">
-                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">Format: JPG, PNG | Ukuran Maks: 2MB</small>
+                        <input type="file" id="buktiPelunasanFile" class="form-control" accept="image/*" onchange="handlePelunasanUpload()" style="padding: 12px; font-size: 16px; height: auto; border-radius: 8px; display: block; margin-left: auto; margin-right: auto;">
+                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem; text-align: center;">Format: JPG, PNG | Ukuran Maks: 2MB</small>
                     </div>
                     
-                    <button type="button" onclick="processPelunasan()" id="btnPelunasan" class="btn w-100 fw-bold" style="background: #28a745; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;" disabled>
-                        ✅ KONFIRMASI PELUNASAN
-                    </button>
+                    <div class="mb-4" style="display: flex; justify-content: center;">
+                        <button type="button" onclick="processPelunasan()" id="btnPelunasan" class="btn fw-bold" style="background: #28a745; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none; width: 100%; max-width: 600px;" disabled>
+                            ✅ KONFIRMASI PELUNASAN
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -302,24 +350,100 @@
 
 <div class="modal fade" id="imgPreviewModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center p-0"><img id="lightboxImg" src="" class="img-fluid rounded"><div class="p-3"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button></div></div></div></div></div>
 
+<!-- NOTIFICATION MODAL -->
+<div class="modal fade" id="notificationModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-portrait">
+        <div class="modal-content text-dark" style="border-radius: 12px; border: 2px solid #f37021;">
+            <div class="modal-header border-0 py-3" style="background: linear-gradient(135deg, #f37021 0%, #e85d0e 100%);">
+                <h6 class="modal-title fw-bold text-white" id="notifTitle">Pemberitahuan</h6>
+            </div>
+            <div class="modal-body py-4" style="font-size: 0.95rem; text-align: center;">
+                <div id="notifIcon" style="font-size: 3rem; margin-bottom: 15px;">✅</div>
+                <p id="notifMessage" class="text-dark fw-middle" style="line-height: 1.6; margin-bottom: 0;"></p>
+            </div>
+            <div class="modal-footer flex-column border-top py-3">
+                <button type="button" class="btn btn-primary w-100 fw-bold" id="notifOkBtn" onclick="handleNotificationOK()" style="background: #f37021; border-color: #f37021; min-height: 50px; font-size: 0.95rem;">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxniTvvkLhnv8_ABVIocDajjxuLQ3ZrgmOUXDXWYH4I5Xv9_KvAIyuElRW6Kr-31X8yqA/exec'; 
     const menuData = { "2026-02-19": "Menu A", "2026-02-20": "Menu B", "2026-02-21": "Menu C", "2026-02-22": "Menu D", "2026-02-23": "Menu E", "2026-02-24": "Menu F", "2026-02-25": "Menu G", "2026-02-26": "Menu H", "2026-02-27": "Menu I", "2026-02-28": "Menu J", "2026-03-01": "Menu A", "2026-03-02": "Menu B", "2026-03-03": "Menu C", "2026-03-04": "Menu D", "2026-03-05": "Menu E", "2026-03-06": "Menu F", "2026-03-07": "Menu G", "2026-03-08": "Menu H", "2026-03-09": "Menu I", "2026-03-10": "Menu J", "2026-03-11": "Menu A", "2026-03-12": "Menu B", "2026-03-13": "Menu C", "2026-03-14": "Menu D", "2026-03-15": "Menu E", "2026-03-16": "Menu F", "2026-03-17": "Menu G", "2026-03-18": "Menu H", "2026-03-19": "Menu I", "2026-03-20": "Menu J" };
     const menuImages = { "Menu A": "asset/img/menu-a.jpg", "Menu B": "asset/img/menu-b.jpg", "Menu C": "asset/img/menu-c.jpg", "Menu D": "asset/img/menu-d.jpg", "Menu E": "asset/img/menu-e.jpg", "Menu F": "asset/img/menu-f.jpg", "Menu G": "asset/img/menu-g.jpg", "Menu H": "asset/img/menu-h.jpg", "Menu I": "asset/img/menu-i.jpg", "Menu J": "asset/img/menu-j.jpg" };
-    // Daftar tanggal yang ingin dinonaktifkan (format: YYYY-MM-DD)
-    // Anda bisa mengubah atau menambahkan tanggal apa saja di array ini.
-    const disabledDates = [
-        // contoh:
-        '2026-02-21', '2026-02-22', '2026-02-23', '2026-02-25', '2026-02-26', '2026-02-27', '2026-02-28', '2026-03-01', '2026-03-02', '2026-03-07'
-    ];
-
-    function isDateDisabled(dateStr) {
-        if (!dateStr) return false;
-        return disabledDates.indexOf(dateStr) !== -1;
-    }
-
     const formatIDR = (val) => "Rp " + Number(val).toLocaleString('id-ID');
+    let isScanning = false; // Untuk mencegah scan ganda
+    let ocrAttempts = 0; // Untuk menghitung jumlah kegagalan
+        
+    // ===== DISABLED DATES FEATURE =====
+    let disabledDatesSet = new Set();
+    
+    async function loadDisabledDates() {
+        try {
+            const url = new URL(SCRIPT_URL);
+            url.searchParams.append('action', 'listDisabledDates');
+            console.log('🔄 Fetching disabled dates from:', url.toString());
+            const resp = await fetch(url.toString());
+            console.log('📦 Response status:', resp.status);
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log('📋 Disabled dates data:', data);
+                if (data.status === 'ok' && Array.isArray(data.dates)) {
+                    disabledDatesSet = new Set(data.dates);
+                    console.log('✅ Set disabled dates:', Array.from(disabledDatesSet));
+                    initFlatpickr();
+                } else {
+                    console.warn('⚠️ Unexpected response format:', data);
+                    initFlatpickr();
+                }
+            } else {
+                console.error('❌ Fetch error:', resp.status, resp.statusText);
+                initFlatpickr();
+            }
+        } catch (e) {
+            console.error('❌ Error loading disabled dates:', e);
+            console.error('📍 Stack:', e.stack);
+            initFlatpickr();
+        }
+    }
+    
+    function initFlatpickr() {
+        const datePicker = document.getElementById('datePicker');
+        if (datePicker._flatpickr) {
+            datePicker._flatpickr.destroy();
+        }
+        
+        // Fungsi untuk disable tanggal yang sudah lewat (sebelum hari ini)
+        const disablePastDates = (date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date < today;
+        };
+        
+        // Combine past dates dan disabled dates dari backend
+        const disableArray = Array.from(disabledDatesSet);
+        disableArray.push(disablePastDates);
+        
+        console.log('🗓️ Initializing Flatpickr with disabled dates:', Array.from(disabledDatesSet));
+        flatpickr(datePicker, {
+            mode: 'single',
+            dateFormat: 'Y-m-d',
+            minDate: '2026-02-19',
+            maxDate: '2026-03-20',
+            disable: disableArray,
+            onChange: function(selectedDates, dateStr) {
+                if (dateStr && menuData[dateStr]) {
+                    document.getElementById('menuContainer').classList.remove('hidden');
+                    document.getElementById('menuTitle').innerText = menuData[dateStr];
+                    document.getElementById('menuDisplay').src = menuImages[menuData[dateStr]];
+                }
+            }
+        });
+        console.log('✅ Flatpickr initialized successfully');
+    }
 
     // Validasi form step2: cek nama depan dan nomor telepon
     function checkFormStep2() {
@@ -381,6 +505,119 @@
     // Tracking reschedule count dari server
     window.rescheduleCount = 0;
     
+    // Global state untuk notification
+    let notificationState = {
+        mode: null,      // 'newReservation', 'reschedule', 'pelunasan'
+        bookingID: null,
+        shouldAutoRefresh: false
+    };
+    
+    // Fungsi untuk menampilkan notification modal
+    function showNotification(mode, bookingID = null) {
+        console.log('📢 Showing notification:', mode, bookingID);
+        notificationState.mode = mode;
+        notificationState.bookingID = bookingID;
+        notificationState.shouldAutoRefresh = false;
+        
+        const modal = document.getElementById('notificationModal');
+        if (!modal) {
+            console.error('❌ notificationModal element not found in DOM!');
+            return;
+        }
+        
+        const icon = document.getElementById('notifIcon');
+        const title = document.getElementById('notifTitle');
+        const message = document.getElementById('notifMessage');
+        
+        if (mode === 'newReservation') {
+            icon.innerHTML = '✅';
+            title.innerHTML = 'Reservasi Berhasil!';
+            
+            // Cek apakah DP atau Lunas
+            const isLunasReservation = (dataInvoice.sisa === 0 || dataInvoice.sisa === "Lunas" || !dataInvoice.sisa);
+            
+            if (isLunasReservation) {
+                // KONDISI LUNAS - Pembayaran Penuh
+                message.innerHTML = `
+                    <strong>Selamat, Reservasi Anda Telah Diproses!</strong><br><br>
+                    💳 Status: <strong style="color: #28a745;">LUNAS</strong><br>
+                    📋 Nomor Reservasi: <strong>${bookingID}</strong><br>
+                    📋 Perlihatkan tiket saat registrasi kedatangan<br>
+                    💾 Tiket akan otomatis diunduh<br>
+                    🔄 Halaman akan otomatis refresh setelah OK<br><br>
+                    <small style="color: #888;">Pastikan folder download terbuka untuk menerima tiket Anda</small>
+                `;
+            } else {
+                // KONDISI DP - Panjar Saja
+                message.innerHTML = `
+                    <strong>Selamat, Reservasi Anda Telah Diproses!</strong><br><br>
+                    📋 Nomor Reservasi: <strong>${bookingID}</strong><br>
+                    📋 Pelunasan paling lambat H-1 sebelum acara<br>
+                    💾 Tiket akan otomatis diunduh<br>
+                    🔄 Halaman akan otomatis refresh setelah OK<br><br>
+                    <small style="color: #888;">Pastikan folder download terbuka untuk menerima tiket Anda</small>
+                `;
+            }
+        } else if (mode === 'reschedule') {
+            icon.innerHTML = '📅';
+            title.innerHTML = 'Reschedule Berhasil!';
+            message.innerHTML = `
+                <strong>Jadwal Anda Telah Diubah!</strong><br><br>
+                📅 Tanggal reservasi telah diperbarui<br>
+                📋 Perlihatkan tiket saat registrasi kedatangan<br>
+                💾 Tiket terbaru akan otomatis diunduh<br>
+                🔄 Halaman akan otomatis refresh setelah OK<br><br>
+                <small style="color: #888;">Terima kasih atas pembaruan jadwal Anda</small>
+            `;
+        } else if (mode === 'pelunasan') {
+            icon.innerHTML = '✅';
+            title.innerHTML = 'Pelunasan Berhasil!';
+            message.innerHTML = `
+                <strong>Pembayaran Anda Telah Diterima!</strong><br><br>
+                💳 Status: <strong style="color: #28a745;">LUNAS</strong><br>
+                📋 Perlihatkan tiket saat registrasi kedatangan<br>
+                💾 Tiket LUNAS akan otomatis diunduh<br>
+                🔄 Halaman akan otomatis refresh setelah OK<br><br>
+                <small style="color: #888;">Terima kasih telah menyelesaikan pembayaran Anda</small>
+            `;
+        }
+        
+        console.log('🔔 About to show modal for:', mode);
+        new bootstrap.Modal(modal).show();
+        console.log('✅ Modal shown');
+    }
+    
+    // Fungsi yang dipanggil ketika OK button diklik
+    function handleNotificationOK() {
+        console.log('👆 OK button clicked, hiding modal...');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('notificationModal'));
+        if (modal) {
+            modal.hide();
+            console.log('✅ Modal hidden');
+        }
+        
+        // Show successOverlay yang sudah di-render di DOM
+        const successOverlay = document.getElementById('successOverlay');
+        if (successOverlay) {
+            console.log('👁️ Showing successOverlay with ticket...');
+            successOverlay.style.opacity = '1';
+            successOverlay.style.pointerEvents = 'auto';
+        }
+        
+        // Trigger auto-download from generated ticket
+        // The dlAction button is set in generateSuccessTicket function
+        const dlBtn = document.getElementById('dlAction');
+        console.log('🔍 Looking for dlBtn:', dlBtn ? 'Found' : 'NOT FOUND');
+        if (dlBtn) {
+            setTimeout(() => {
+                console.log('⬇️ Triggering download...');
+                dlBtn.click();
+            }, 300);
+        } else {
+            console.warn('⚠️ dlAction button not found, download will not trigger');
+        }
+    }
+    
     // Fungsi helper untuk generate nama file tiket berdasarkan kondisi
     function generateTicketFileName(bookingID, isReschedule, isLunas) {
         if (isReschedule && isLunas) {
@@ -415,6 +652,10 @@
 
     // Setup Booking ID input formatter
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎯 DOMContentLoaded - Starting loadDisabledDates...');
+        // Load disabled dates on init
+        loadDisabledDates();
+        
         const resIDInput = document.getElementById('resID');
         if (resIDInput) {
             resIDInput.addEventListener('input', function(e) {
@@ -434,11 +675,26 @@
     function showRescheduleModal() { 
         // Reset semua step ke awal
         window.rescheduleCount = 0; // Reset reschedule count
+        ocrAttempts = 0; // Reset OCR attempt counter
         document.getElementById('resID').value = '';
         document.getElementById('newDate').value = '';
         document.getElementById('buktiPelunasanFile').value = '';
         const resNoteEl = document.getElementById('resNote');
         if (resNoteEl) resNoteEl.innerText = ''; // Clear help text
+        
+        // Clear OCR error message from previous attempts
+        const infoGagalOCR = document.getElementById('infoGagalOCR');
+        if (infoGagalOCR) infoGagalOCR.remove();
+        
+        // Reset button styling
+        const btnPelunasan = document.getElementById('btnPelunasan');
+        if (btnPelunasan) {
+            btnPelunasan.className = 'btn btn-primary';
+            btnPelunasan.innerText = "📤 UPLOAD BUKTI TRANSFER";
+            btnPelunasan.onclick = function() { document.getElementById('buktiPelunasanFile').click(); };
+            btnPelunasan.disabled = false;
+        }
+        
         document.getElementById('resStep1').classList.remove('hidden');
         document.getElementById('resStep2').classList.add('hidden');
         document.getElementById('resStep3a').classList.add('hidden');
@@ -454,7 +710,7 @@
         try {
             const resp = await fetch(SCRIPT_URL, { 
                 method: 'POST', 
-                body: JSON.stringify({ action: "findBooking", bookingID: id }) 
+                body: JSON.stringify({ action: "findBooking", bookingID: id, includeOriginalDPBukti: true }) 
             });
 
             if (!resp.ok) throw new Error("Server error");
@@ -465,12 +721,70 @@
                 window.isReschedule = true;
                 dataInvoice.bayar = data.bayar;
                 dataInvoice.sisa = data.sisa;
+                const bookingID = id;  // Simpan bookingID untuk tracking
+                
                 // FIX: Pastikan data pax tersimpan dengan benar
                 tempResData = {
                     name: data.name,
-                    paxDetail: data.pax, // Mengambil data pax dari kolom sheet
+                    paxDetail: data.pax,
                     oldDateRaw: data.oldDateRaw
                 };
+                
+                // TRACKING: Cek & restore original DP fingerprint untuk deteksi duplikat bukti
+                console.log('🔍 Looking for original DP fingerprint for bookingID:', bookingID);
+                
+                // Step 1: Cek localStorage dengan bookingID
+                let dpFingerprint = localStorage.getItem(`dpBuktiFingerprint_${bookingID}`);
+                if (dpFingerprint) {
+                    try {
+                        window.dpBuktiFingerprint = JSON.parse(dpFingerprint);
+                        console.log('✅ Loaded DP Fingerprint from localStorage (bookingID):', window.dpBuktiFingerprint);
+                    } catch (e) {
+                        console.warn('⚠️ Failed to parse stored fingerprint:', e);
+                    }
+                }
+                
+                // Step 2: Jika backend kirim original fingerprint, simpan juga
+                if (!window.dpBuktiFingerprint && data.originalDPFingerprint) {
+                    window.dpBuktiFingerprint = data.originalDPFingerprint;
+                    localStorage.setItem(`dpBuktiFingerprint_${bookingID}`, JSON.stringify(data.originalDPFingerprint));
+                    console.log('✅ Loaded DP Fingerprint from backend:', window.dpBuktiFingerprint);
+                } 
+                // Step 3: Jika backend kirim bukti base64, extract fingerprint-nya
+                else if (!window.dpBuktiFingerprint && data.originalDPBuktiBase64) {
+                    console.log('🔄 Computing fingerprint from original DP bukti...');
+                    try {
+                        // Convert base64 to blob
+                        const base64Data = data.originalDPBuktiBase64.split(',')[1] || data.originalDPBuktiBase64;
+                        const byteArray = atob(base64Data);
+                        const arrayBuffer = new ArrayBuffer(byteArray.length);
+                        const view = new Uint8Array(arrayBuffer);
+                        for (let i = 0; i < byteArray.length; i++) {
+                            view[i] = byteArray.charCodeAt(i);
+                        }
+                        const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+                        const file = new File([blob], 'original_dp.jpg', { type: 'image/jpeg' });
+                        
+                        // Generate fingerprint
+                        generateImageFingerprint(file).then(fingerprint => {
+                            window.dpBuktiFingerprint = fingerprint;
+                            localStorage.setItem(`dpBuktiFingerprint_${bookingID}`, JSON.stringify(fingerprint));
+                            console.log('✅ Computed & saved DP Fingerprint from backend bukti:', fingerprint);
+                        }).catch(err => {
+                            console.warn('⚠️ Failed to compute fingerprint:', err);
+                        });
+                    } catch (e) {
+                        console.error('❌ Error processing original bukti:', e);
+                    }
+                }
+                
+                if (!window.dpBuktiFingerprint) {
+                    console.log('ℹ️ No original DP bukti data from backend for duplicate detection');
+                    console.log('💡 INSTRUKSI BACKEND: Saat findBooking() dipanggil, return salah satu dari:');
+                    console.log('   1. originalDPFingerprint: {fileSize, fileName, pHash, grayscaleAvg}');
+                    console.log('   2. originalDPBuktiBase64: bukti DP dalam format base64');
+                    console.log('   Tanpa ini, duplicate detection hanya bisa gunakan nominal (tidak akurat jika sisa=DP)');
+                }
 
                 // Cek apakah sudah lunas atau masih ada sisa
                 const isLunas = (data.sisa === 0 || data.sisa === "Lunas" || !data.sisa);
@@ -545,13 +859,20 @@
         document.getElementById('loader').style.display = 'none';
     }
 
+    // Fungsi untuk clear DP fingerprint setelah sukses submit
+    function clearDPFingerprint() {
+        window.dpBuktiFingerprint = null;
+        sessionStorage.removeItem('dpBuktiFingerprint');
+        console.log('🗑️ DP Fingerprint cleared');
+    }
+
     function chooseReschedule() {
         const packageInfo = window.currentPackageInfo;
         
         // Set min/max date untuk reschedule
         const dateInput = document.getElementById('newDate');
         if(packageInfo.isPromo) {
-            dateInput.min = "2026-02-20";
+            dateInput.min = "2026-02-19";
             dateInput.max = "2026-03-02";
         } else {
             dateInput.min = "2026-03-03";
@@ -559,6 +880,17 @@
         }
 
         document.getElementById('resInfo2').innerHTML = `Pilih tanggal baru untuk ${packageInfo.isPromo ? 'Promo' : 'Normal'} (${dateInput.min} s/d ${dateInput.max})`;
+        
+        // Inisialisasi flatpickr untuk modal reschedule
+        if (!dateInput._flatpickr) {
+            flatpickr(dateInput, {
+                mode: 'single',
+                dateFormat: 'Y-m-d',
+                minDate: dateInput.min,
+                maxDate: dateInput.max,
+                disable: Array.from(disabledDatesSet)
+            });
+        }
         
         document.getElementById('resStep2').classList.add('hidden');
         document.getElementById('resStep3a').classList.remove('hidden');
@@ -605,6 +937,11 @@
         const id = document.getElementById('resID').value;
         const newD = document.getElementById('newDate').value;
         if(!newD) return alert("Pilih tanggal!");
+        
+        // Validasi tanggal reschedule tidak ada di daftar ter-disable
+        if (disabledDatesSet.has(newD)) {
+            return alert('⚠️ Maaf, tanggal ' + newD + ' tidak tersedia untuk reschedule.');
+        }
     
         document.getElementById('loader').style.display = 'flex';
         document.getElementById('btnSaveReschedule').disabled = true;
@@ -623,14 +960,11 @@
                 document.getElementById('btnSaveReschedule').disabled = false;
             } else if(result.startsWith("SUCCESS")) {
                 // 2. Generate Tiket & Kirim ke Drive (await upload result)
-                const uploaded = await generateSuccessTicket(id, newD, tempResData.name, tempResData.paxDetail, true);
+                await generateSuccessTicket(id, newD, tempResData.name, tempResData.paxDetail, true);
                 // Tutup modal setelah upload selesai
                 resModal.hide();
-                if (uploaded) {
-                    alert('Reschedule berhasil dan tiket tersimpan di Drive.');
-                } else {
-                    alert('Reschedule berhasil, namun penyimpanan tiket ke Drive gagal/timeout. Silakan unduh tiket secara manual.');
-                }
+                // Show notification - auto-download dan refresh akan ditangani oleh modal
+                showNotification('reschedule', id);
             }
         } catch (e) { 
             alert("Gagal update database."); 
@@ -640,6 +974,7 @@
     }
 
     async function generateSuccessTicket(bookingID, dateVal, fullName, paxDetail, isReschedule = false) {
+        console.log('🎫 Generating ticket for:', bookingID, dateVal, fullName);
         const cantik = getTanggalCantik(dateVal);
         const fixedTime = "17:45 - 20:00";
         const isLunas = (dataInvoice.sisa === 0 || dataInvoice.sisa === "Lunas");
@@ -647,6 +982,8 @@
         // Update global tracking status untuk naming convention
         window.ticketStatus.isReschedule = isReschedule;
         window.ticketStatus.isLunas = isLunas;
+        
+        console.log('📊 Ticket status:', { isReschedule, isLunas });
         
         // LOGIC: Tentukan styling berdasarkan kombinasi reschedule + lunas
         let labelStatus = "";
@@ -691,7 +1028,7 @@
         }
 
         const successHTML = `
-            <div id="successOverlay">
+            <div id="successOverlay" style="opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
                 <div id="captureArea" class="ticket-card" style="max-width: 380px; border: none; background: #fff; border-radius:0px; text-align:center;">
 
                     ${watermarkText ? `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; color: ${watermarkColor}; font-weight: 900; z-index: 0; pointer-events: none;">${watermarkText}</div>` : ''}
@@ -748,6 +1085,7 @@
             </div>`;
         
         document.body.insertAdjacentHTML('beforeend', successHTML);
+        console.log('✅ Ticket HTML injected to DOM - ticketStatus:', window.ticketStatus);
 
         // Render Canvas & Upload ke Drive
         // Render canvas and perform upload immediately (so submitReschedule can await completion)
@@ -756,9 +1094,11 @@
             const canvas = await html2canvas(document.querySelector("#captureArea"), { scale: 2, useCORS: true });
             const tiketBase64 = canvas.toDataURL("image/png").split(',')[1];
 
-            // Jika ini adalah reschedule (termasuk reschedule+paid), upload tiket reschedule ke Drive sekarang
+            // HANYA upload tiket jika ini adalah RESCHEDULE atau PELUNASAN dari modal
+            // Untuk newBooking (isReschedule=false), form submission yang handle upload
             if (isReschedule) {
-                // Try primary payload first (includes filename + isLunas)
+                // RESCHEDULE: upload tiket reschedule ke Drive
+                console.log('📤 Uploading reschedule ticket...');
                 const ticketFileName = generateTicketFileName(bookingID, true, isLunas);
                 let triedResponses = [];
 
@@ -791,47 +1131,9 @@
                 }
 
                 if (!uploadSuccess) console.warn('All upload attempts failed for reschedule. Attempts:', triedResponses);
-            } else if (isLunas && !isReschedule) {
-                // Untuk kasus pelunasan biasa (tidak reschedule), upload tiket paid dengan fallback attempts
-                const ticketFileName = generateTicketFileName(bookingID, false, true);
-                let triedResponses = [];
-
-                const tryUpload = async (p) => {
-                    try {
-                        const resp = await Promise.race([fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }), new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 12000))]);
-                        const text = await resp.text();
-                        triedResponses.push(text);
-                        if (text && text.includes('SUCCESS')) return true;
-                        return false;
-                    } catch (err) {
-                        triedResponses.push(err.message);
-                        return false;
-                    }
-                };
-
-                // Primary: try uploadPaidTicket with full payload
-                const primaryPayload = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName };
-                uploadSuccess = await tryUpload(primaryPayload);
-
-                if (!uploadSuccess) {
-                    // Fallback 1: try updateTicketDrive with paid flags
-                    const fallback1 = { action: 'updateTicketDrive', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isLunas: true, isPaid: true };
-                    uploadSuccess = await tryUpload(fallback1);
-                }
-
-                if (!uploadSuccess) {
-                    // Fallback 2: try minimal uploadPaidTicket payload
-                    const fallback2 = { action: 'uploadPaidTicket', bookingID: bookingID, tiketBase64: tiketBase64 };
-                    uploadSuccess = await tryUpload(fallback2);
-                }
-
-                if (!uploadSuccess) {
-                    // Fallback 3: try uploadRescheduleTicket with isPaid flag
-                    const fallback3 = { action: 'uploadRescheduleTicket', bookingID: bookingID, tiketBase64: tiketBase64, ticketFileName: ticketFileName, isReschedule: false, isLunas: true };
-                    uploadSuccess = await tryUpload(fallback3);
-                }
-
-                if (!uploadSuccess) console.warn('All upload attempts failed for paid ticket. Attempts:', triedResponses);
+            } else {
+                // NEW BOOKING: jangan upload di sini, biarkan form submission handle
+                console.log('ℹ️ New booking - upload akan ditangani oleh form submission');
             }
 
             // Setup download button (local only)
@@ -861,7 +1163,8 @@
             };
         } catch (err) {
             console.error('Error in generateSuccessTicket:', err);
-            alert('Error saat render tiket. Silakan refresh dan coba lagi.');
+            alert('❌ Error saat render tiket. Silakan refresh halaman dan coba lagi.\n\nError: ' + err.message);
+            throw err; // Re-throw agar caller tahu ada error
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
@@ -884,18 +1187,7 @@
             document.getElementById('paxTotal').value = totalPax;
         }
         
-        if (!tanggalInput) return;
-
-        // Cegah pemilihan tanggal yang dinonaktifkan
-        if (isDateDisabled(tanggalInput)) {
-            document.getElementById('priceInfo').innerText = "Tanggal ini tidak tersedia. Silakan pilih tanggal lain.";
-            const btnNext = document.getElementById('btnNext1');
-            if (btnNext) {
-                btnNext.disabled = true;
-                btnNext.style.opacity = '0.5';
-            }
-            return;
-        }
+        if (!tanggalInput) return;       
 
         // Logika Harga Berdasarkan Tanggal
         let hargaDewasa = 0;
@@ -903,7 +1195,7 @@
         const start1 = new Date('2026-02-19');
         const end1 = new Date('2026-03-02');
         const start2 = new Date('2026-03-03');
-        const end2 = new Date('2026-03-19');
+        const end2 = new Date('2026-03-20');
 
         if (selectedDate >= start1 && selectedDate <= end1) {
             hargaDewasa = 100000;
@@ -942,58 +1234,667 @@
     document.getElementById('paxAnak').addEventListener('input', calculateInvoice);
     document.getElementById('datePicker').addEventListener('change', calculateInvoice);
 
+    // --- FUNGSI HELPER OCR (Tambahkan ini) ---
+    async function runOCR(file, targetAmount) {
+        // KONFIGURASI DATA TOKO ANDA
+        const NAMA_TOKO = "ISTANA ALAM RAYA"; 
+        const REKENING_TOKO = "1010069909909"; 
+
+        try {
+            const result = await Tesseract.recognize(file, 'ind');
+            let rawText = result.data.text.toUpperCase();
+        
+            // 1. Normalisasi: Hapus koma & titik, O->0, multiple spaces
+            let normalizedText = rawText.replace(/O/g, '0').replace(/[,.]/g, '').replace(/\s+/g, ' ');
+        
+            const cleanAmount = targetAmount.toString().replace(/\D/g, '');
+
+            // 2. DETEKSI TIPE PAYMENT - KETAT! (Jangan campur bank dan e-wallet)
+            // E-Wallet: Hanya jika ada nama provider spesifik (JANGAN generic words seperti TRANSFER)
+            const eWalletProviderNames = /SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU/i;
+            const hasEWalletProviderName = eWalletProviderNames.test(rawText);
+            
+            // Bank: Jika ada nama toko atau rekening
+            const bankKeywords = /BANK|REKENING|ACCOUNT|NO\s*REK|BCA|MANDIRI|BRI|PERMATA|JAGO|JENIUS|BTPN|SEABANK|SEA\s?BANK|BLU|NEO\s?COMMERCE|BNC|ALADIN|SYARIAH|LINE\s?BANK|DIGIBANK|DBS|TMRW|UOB|ALLO\s?BANK|KROM/i;
+            const hasBankKeywords = bankKeywords.test(rawText);
+            
+            // Tentukan mode: prioritas ke yang paling specific
+            // Jika ada nama provider e-wallet + BUKAN bank transfer → Mode E-Wallet
+            // Jika ada keyword bank atau rekening → Mode Bank
+            // Otherwise → coba deduksi dari nominal pattern
+            const isBankTransferMode = hasBankKeywords || normalizedText.includes(NAMA_TOKO) || normalizedText.replace(/\D/g, '').includes(REKENING_TOKO);
+            const isEWalletMode = hasEWalletProviderName && !isBankTransferMode;
+            
+            console.log("--- DEBUG OCR ---");
+            console.log("Raw Text Sample:", rawText.substring(0, 300));
+            console.log("Bank Mode (bank keywords/toko name/rekening found):", isBankTransferMode);
+            console.log("E-Wallet Mode (provider name found):", isEWalletMode);
+
+            // 3. CHECK NOMINAL dengan MULTIPLE PATTERN
+            let isNominalValid = false;
+            
+            // Pattern A: Standard format (NOMINAL/RP/IDR + amount)
+            const pattern1 = new RegExp(`(?:NOMINAL|JUMLAH|AMOUNT)\\s+(?:RP\\.?|IDR)?\\s*${cleanAmount}(?:\\.00|\\s|[^0-9]|$)`, 'i');
+            
+            // Pattern B: Amount dengan berbagai format (RP 300000, 300000 RP, dll)
+            const pattern2 = new RegExp(`RP\\s*${cleanAmount}|${cleanAmount}\\s*RP|IDR\\s*${cleanAmount}|${cleanAmount}\\s*IDR`, 'i');
+            
+            // Pattern C: Standalone nominal (e-wallet style) - nominal di antara space/symbols
+            const pattern3 = new RegExp(`[^0-9]${cleanAmount}[^0-9]|^${cleanAmount}[^0-9]|[^0-9]${cleanAmount}$|^${cleanAmount}$`, 'i');
+            
+            // Pattern D: Action words + nominal (SENT, TRANSFER, etc)
+            const pattern4 = new RegExp(`(?:SENT|TRANSFER|TERIMA|BAYAR|KIRIM|DIKIRIM|JUMLAH|AMOUNT)\\s+.*?${cleanAmount}|${cleanAmount}\\s+(?:SENT|TRANSFER|IDR|RP|OK|BERHASIL)`, 'is');
+
+            isNominalValid = pattern1.test(normalizedText) || 
+                             pattern2.test(normalizedText) || 
+                             pattern3.test(normalizedText) || 
+                             pattern4.test(normalizedText);
+            
+            // TRACK: Simpan nominal yang ter-ekstrak untuk deteksi duplicate bukti
+            window.lastExtractedNominal = isNominalValid ? Number(targetAmount) : 0;
+            console.log("📊 Extracted Nominal stored:", window.lastExtractedNominal);
+
+            console.log("Nominal Target:", cleanAmount);
+            console.log("Pattern 1 (Standard Bank):", pattern1.test(normalizedText));
+            console.log("Pattern 2 (RP/IDR format):", pattern2.test(normalizedText));
+            console.log("Pattern 3 (Standalone E-wallet):", pattern3.test(normalizedText));
+            console.log("Pattern 4 (Action + amount):", pattern4.test(normalizedText));
+            console.log("Nominal Valid:", isNominalValid);
+
+            // 4. VERIFIKASI IDENTITAS (berbeda untuk bank vs e-wallet)
+            const cleanTextNumbers = normalizedText.replace(/\D/g, '');
+            const isRekeningValid = cleanTextNumbers.includes(REKENING_TOKO);
+            const isNamaValid = normalizedText.includes(NAMA_TOKO);
+
+            // 4b. UNTUK E-WALLET: Validasi BERLAPIS untuk memastikan bukti pembayaran benar-benar VALID
+            // Jangan hanya cek nominal saja! Harus ada: PROVIDER + ACTION + STATUS
+            
+            const providerSourcePatterns = [
+                // Pattern 1: Explicit source keywords with provider (Strongest)
+                /DARI\s+(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)/i,
+                /FROM\s+(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)/i,
+                /SUMBER[:\s]+(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)/i,
+                /SOURCE[:\s]+(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)/i,
+                
+                // Pattern 2: Provider with action keywords (Strong)
+                /(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)\s+(TO|TRANSFER|KIRIM|SENDED|SEND|MENGIRIM)/i,
+                /(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)\s+ACCOUNT/i,
+                /(TRANSFER|PEMBAYARAN|PAYMENT)\s+(FROM|DARI|VIA)\s+(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO|SAKUKU|I[\s.]?SAKU|ISAKU|DOKU)/i
+            ];
+            
+            let hasValidProviderSource = false;
+            let detectedProviderName = null;
+            
+            // Check Level 1 & 2 (Explicit source keywords)
+            for (const pattern of providerSourcePatterns) {
+                const match = rawText.match(pattern);
+                if (match) {
+                    hasValidProviderSource = true;
+                    // Ekstrak nama provider dari match
+                    const providerMatch = match[0].match(/(SHOPEEPAY|SHOPEE\s?PAY|DANA|LINKAJA|LINK\s?AJA|GOPAY|GO[\s-]?PAY|OVO|SEABANK|JAGO)/i);
+                    if (providerMatch) detectedProviderName = providerMatch[0];
+                    console.log("✅ Provider source verified (Level 1-2):", detectedProviderName || match[0]);
+                    break;
+                }
+            }
+            
+            // ❌ NO Level 3 Fallback! 
+            // REQUIREMENT: E-wallet MUST have explicit source keyword (Dari:/From:/Via:)
+            // This prevents tickets/non-payment screenshots from being mistaken as payment proofs
+            // Standalone provider name (without context) is too risky - could appear in T&C, menu, etc
+            
+            // 4c. UNTUK E-WALLET: Tambahan - Cek STATUS (bukti pembayaran BERHASIL/SUKSES, bukan hanya action saja)
+            // Ini mencegah upload gambar yang hanya kebetulan ada kata "transfer" tapi belum tentu berhasil
+            // PENTING: Gunakan payment-specific patterns, bukan hanya generic "BERHASIL" (yg bisa dari "RESERVASI BERHASIL")
+            const paymentStatusKeywords = /TRANSFER\s+(BERHASIL|SUKSES|SUCCESS)|PEMBAYARAN\s+(BERHASIL|SUKSES|SUCCESS)|TRANSAKSI\s+(BERHASIL|SUKSES)|KIRIM\s+(SUKSES|BERHASIL)|TRANSFER\s+SUKSES|KIRIM\s+SUKSES|PROSES\s+BERHASIL|DIKIRIM|TERKIRIM|TERKONFIRMASI|CONFIRMED|PAID/i;
+            const hasPaymentStatus = paymentStatusKeywords.test(rawText);
+            
+            console.log("Rekening Valid:", isRekeningValid);
+            console.log("Nama Valid:", isNamaValid);
+            console.log("E-Wallet Provider Source Valid:", hasValidProviderSource, "Provider:", detectedProviderName);
+            console.log("Payment Status Keywords Found (BERHASIL/SUCCESS/OK/etc):", hasPaymentStatus);
+
+            // 5. FINAL DECISION
+            let finalResult = false;
+            
+            if (isEWalletMode) {
+                // 💳 E-WALLET: NOMINAL + SUMBER PROVIDER + STATUS (WAJIB SEMUA 3!)
+                // ❌ TIDAK VALID jika: nominal cocok tapi tidak bisa diverifikasi sumber dananya dari mana
+                // ✅ VALID jika: nominal cocok + provider terlihat jelas + status pembayaran BERHASIL
+                finalResult = isNominalValid && hasValidProviderSource && hasPaymentStatus;
+                
+                console.log("✅ E-WALLET MODE: Nominal + Provider Source + Payment Status check");
+                console.log("  - Nominal valid:", isNominalValid);
+                console.log("  - Provider source valid:", hasValidProviderSource, "(" + detectedProviderName + ")");
+                console.log("  - Payment status valid:", hasPaymentStatus);
+                
+                if (!isNominalValid) {
+                    console.warn("❌ Nominal not found or doesn't match");
+                } else if (!hasValidProviderSource) {
+                    console.warn("❌ CRITICAL: No e-wallet EXPLICIT SOURCE found! E-wallet WAJIB menampilkan: 'Dari: Dana', 'From: Gopay', 'Via: Shopeepay', 'Sumber: OVO', 'Dari: LinkAja', 'Dari: Sakuku', 'Dari: i.Saku', 'Dari: DOKU'. Tidak cukup hanya nama provider saja (bisa dari Terms & Conditions)!");
+                } else if (!hasPaymentStatus) {
+                    console.warn("❌ No payment status found. Harus ada: 'BERHASIL', 'SUCCESS', 'TERIMA', 'CONFIRMED', dll");
+                }
+            } else if (isBankTransferMode) {
+                // 🏦 BANK TRANSFER: NOMINAL + (NAMA ATAU REKENING TOKO)
+                // ✅ VALID jika: nominal cocok + nama/rekening toko terlihat
+                finalResult = isNominalValid && (isRekeningValid || isNamaValid);
+                
+                console.log("✅ BANK TRANSFER MODE: Nominal + Bank ID check");
+                console.log("  - Nominal valid:", isNominalValid);
+                console.log("  - Bank ID valid:", isRekeningValid || isNamaValid);
+                
+                if (!isNominalValid) {
+                    console.warn("❌ Nominal not found");
+                } else if (!isRekeningValid && !isNamaValid) {
+                    console.warn("❌ Bank info not found. Harus ada: nama toko atau nomor rekening");
+                }
+            } else {
+                // ⚠️ TIDAK BISA DIKENALI
+                console.warn("❌ Tidak bisa menentukan tipe pembayaran (Bank atau E-Wallet)");
+                console.warn("❌ Harus ada: Nama e-wallet (Dana/Gopay/Shopeepay) ATAU nama/rekening bank");
+                finalResult = false;
+            }
+            
+            console.log("✅ FINAL RESULT:", finalResult);
+            return finalResult;
+        
+        } catch (e) {
+            console.error("OCR Error:", e);
+            return false;
+        }
+    }
+
     // Handle bukti upload: enable submit only if bukti file exists and nominal >= minimal DP
-    function handleBuktiUpload() {
+    async function handleBuktiUpload() {
         const fileInput = document.getElementById('buktiBayar');
-        const nominal = getNominalNumber() || 0;
+        const btnSubmit = document.getElementById('submitBtn'); 
+        const msgError = document.getElementById('msgErrorDP');
+    
+        // Ambil data pendukung
+        const nominalDiupload = typeof getNominalNumber === 'function' ? getNominalNumber() : 0;
         const totalHarga = dataInvoice.total || 0;
         const minDP = totalHarga * 0.5 || 0;
-        const btnSubmit = document.getElementById('submitBtn');
 
-        if (!fileInput || fileInput.files.length === 0) {
+        // 1. Validasi Awal (Cegah proses jika sedang scan atau file kosong)
+        if (isScanning) return; 
+        if (!fileInput || fileInput.files.length === 0) return;
+
+        // 2. Validasi Nominal Minimal (Hemat proses OCR)
+        if (nominalDiupload < minDP) {
+            msgError.innerHTML = `⚠️ Nominal kurang dari 50%! (Minimal: Rp ${minDP.toLocaleString()})`;
+            msgError.style.color = "#ff4444";
             btnSubmit.disabled = true;
             return;
         }
 
-        if (nominal < minDP) {
-            document.getElementById('msgErrorDP').innerText = "⚠️ Nominal kurang dari 50%!";
+        try {
+            isScanning = true; 
             btnSubmit.disabled = true;
-            return;
-        }
+            btnSubmit.innerText = "🔍 MEMVERIFIKASI...";
+            msgError.style.color = "#f37021";
+            msgError.innerText = "Mohon tunggu, sistem sedang membaca bukti...";
 
-        // File exists and nominal ok
-        document.getElementById('msgErrorDP').innerText = "";
-        btnSubmit.disabled = false;
+            // 3. Eksekusi OCR
+            const isValid = await runOCR(fileInput.files[0], nominalDiupload);
+
+            if (isValid) {
+                // BERHASIL
+                ocrAttempts = 0; // Reset hitungan gagal
+                msgError.innerText = "✅ Bukti Valid! Silakan kirim reservasi.";
+                msgError.style.color = "#28a745";
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('btn-blink'); // Hapus blink jika sebelumnya ada
+                btnSubmit.innerText = "KIRIM RESERVASI";
+                
+                // TRACK: Simpan fingerprint DP bukti untuk deteksi duplikat di pelunasan
+                console.log('🔄 Starting fingerprint generation...');
+                try {
+                    const buktiBayarFile = fileInput.files[0];
+                    console.log('📄 File details:', {
+                        name: buktiBayarFile.name,
+                        size: buktiBayarFile.size,
+                        type: buktiBayarFile.type
+                    });
+                    
+                    const dpFingerprint = await generateImageFingerprint(buktiBayarFile);
+                    console.log('✅ Fingerprint generated successfully:', dpFingerprint);
+                    
+                    // Simpan ke window
+                    window.dpBuktiFingerprint = dpFingerprint;
+                    console.log('💾 Saved to window.dpBuktiFingerprint');
+                    
+                    // Simpan ke sessionStorage agar tetap ada setelah page refresh
+                    const jsonString = JSON.stringify(dpFingerprint);
+                    sessionStorage.setItem('dpBuktiFingerprint', jsonString);
+                    console.log('💾 Saved to sessionStorage - length:', jsonString.length);
+                    
+                    // ALSO Simpan ke localStorage dengan key dpBuktiFingerprint_* untuk persistent storage
+                    localStorage.setItem('dpBuktiFingerprint', jsonString);
+                    console.log('💾 Saved to localStorage for persistent access');
+                    
+                    // Verify it was saved
+                    const verify = sessionStorage.getItem('dpBuktiFingerprint');
+                    console.log('✔️ Verification - sessionStorage has data:', !!verify);
+                    
+                } catch (fpErr) {
+                    console.error('❌ ERROR generating fingerprint:', fpErr);
+                    console.error('Stack:', fpErr.stack);
+                }
+            } else {
+                // GAGAL
+                ocrAttempts++;
+            
+                if (ocrAttempts >= 3) {
+                    // Tampilkan Tombol Bantuan Manual (Gagal 3x)
+                    msgError.innerHTML = `
+                        <div class="alert-ocr-fail">
+                            <span style="color: #c53030; font-weight: bold;">⚠️ VERIFIKASI GAGAL 3x</span><br>
+                            <small style="color: #742a2a;">Sistem kesulitan membaca struk Anda secara otomatis.</small>
+                            <button type="button" class="btn-blink" id="btnBantuanStep3">
+                                💬 CHAT ADMIN (MANUAL)
+                            </button>
+                        </div>`;
+
+                    document.getElementById('btnBantuanStep3').addEventListener('click', hubungiAdmin);
+                    btnSubmit.style.display = 'none'; // Sembunyikan tombol submit asli agar tidak bingung
+
+                        // Pasang Event Listener ke ID yang benar
+                    const btnBantuan = document.getElementById('btnBantuanManual');
+                    if (btnBantuan) {
+                        btnBantuan.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            hubungiAdmin(); // Memanggil fungsi hubungiAdmin Anda
+                        });
+                    }
+        
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerText = "GUNAKAN BANTUAN MANUAL";
+                } else {
+                    // Gagal Biasa (Di bawah 3x)
+                    msgError.innerHTML = `⚠️ Data tidak cocok. Percobaan ke-${ocrAttempts}/3.<br>
+                    <small style="font-size:12px; color:#d32f2f;"><strong>Cek di struk Anda:</strong><br>
+                    ✓ Nominal: Rp ${(typeof getNominalNumber === 'function' ? getNominalNumber() : 0).toLocaleString()}<br>
+                    ✓ E-wallet: <strong>HARUS</strong> tulisan "Dari: [Provider]" atau "From: [Provider]" (e.g. "Dari: Dana", "From: Gopay")<br>
+                    ✓ E-wallet: status (TRANSFER BERHASIL / PEMBAYARAN BERHASIL)<br>
+                    ✓ Bank: nama rekening + bank digital</small>`;
+                    msgError.style.color = "#ff4444";
+                    btnSubmit.innerText = "COBA UPLOAD LAGI";
+                }    
+            }
+        } catch (e) {
+            console.error("Error pada handleBuktiUpload:", e);
+            msgError.innerText = "❌ Terjadi kesalahan teknis saat membaca gambar.";           
+        } finally {
+            isScanning = false; 
+        }
     }
 
-    // Handle pelunasan upload: enable confirm button only if bukti file exists
-    function handlePelunasanUpload() {
+    // Pastikan ID 'buktiBayar' sesuai dengan ID input file di HTML Step 3 Anda
+    document.getElementById('buktiBayar').addEventListener('change', handleBuktiUpload);
+
+    // Fungsi untuk membuat image fingerprint (deteksi bukti yang sama)
+    // Fungsi untuk membuat Perceptual Hash (pHash) - lebih robust untuk deteksi duplikat
+    async function generateImageFingerprint(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('File read error'));
+            reader.onload = (e) => {
+                try {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('Image load error'));
+                    img.onload = () => {
+                        // Resize ke 8x8 untuk perceptual hash (standard)
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 8;
+                        canvas.height = 8;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 8, 8);
+                        const imageData = ctx.getImageData(0, 0, 8, 8).data;
+                        
+                        // Convert ke grayscale dan hitung average
+                        let totalBrightness = 0;
+                        const grayscale = [];
+                        for (let i = 0; i < imageData.length; i += 4) {
+                            const brightness = (imageData[i] + imageData[i+1] + imageData[i+2]) / 3;
+                            grayscale.push(brightness);
+                            totalBrightness += brightness;
+                        }
+                        
+                        const avgBrightness = totalBrightness / grayscale.length;
+                        
+                        // Generate binary hash: 1 jika pixel > avg, 0 jika < avg
+                        let hash = '';
+                        for (let i = 0; i < grayscale.length; i++) {
+                            hash += grayscale[i] > avgBrightness ? '1' : '0';
+                        }
+                        
+                        // Convert binary hash ke hex untuk compact storage
+                        let hexHash = '';
+                        for (let i = 0; i < hash.length; i += 4) {
+                            const chunk = hash.substr(i, 4);
+                            hexHash += parseInt(chunk.padEnd(4, '0'), 2).toString(16);
+                        }
+                        
+                        const fingerprint = {
+                            fileSize: file.size,
+                            fileName: file.name,
+                            lastModified: file.lastModified,
+                            pHash: hexHash,  // Perceptual hash (binary pattern)
+                            grayscaleAvg: Math.round(avgBrightness),
+                            uploadTime: new Date().toISOString()
+                        };
+                        
+                        console.log('🔐 Perceptual Hash Generated:', fingerprint);
+                        resolve(fingerprint);
+                    };
+                    img.src = e.target.result;
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Fungsi untuk hitung Hamming Distance (similarity antara 2 pHash)
+    // Hamming distance = banyaknya bit yang berbeda
+    // Semakin kecil = semakin similar
+    function hammingDistance(hash1, hash2) {
+        if (!hash1 || !hash2 || hash1.length !== hash2.length) return 999;
+        
+        let distance = 0;
+        for (let i = 0; i < hash1.length; i++) {
+            if (hash1[i] !== hash2[i]) distance++;
+        }
+        return distance;
+    }
+
+    // --- MODIFIKASI handlePelunasanUpload (Modal Reschedule/Lunas) ---
+    async function handlePelunasanUpload() {
         const fileInput = document.getElementById('buktiPelunasanFile');
         const btnPelunasan = document.getElementById('btnPelunasan');
+        const sisaBayar = dataInvoice.sisa || 0;
+        const dpBayar = dataInvoice.bayar || 0;
+        const bookingID = document.getElementById('resID').value;  // Get bookingID dari modal
 
-        if (!fileInput || fileInput.files.length === 0) {
-            btnPelunasan.disabled = true;
-            return;
-        }
+        if (isScanning) return;
+        if (!fileInput || fileInput.files.length === 0) return;
 
-        // File exists
-        btnPelunasan.disabled = false;
+        try {
+            isScanning = true;
+            btnPelunasan.disabled = true;            
+            btnPelunasan.innerText = "🔍 VERIFIKASI...";
+
+            const pelunasanFile = fileInput.files[0];
+            
+            // 1. DETEKSI BUKTI DUPLIKAT (Perceptual Hash + Metadata)
+            console.log('📸 Checking for duplicate bukti...');
+            console.log('🔍 Current window.dpBuktiFingerprint:', window.dpBuktiFingerprint);
+            console.log('🔍 bookingID:', bookingID);
+            console.log('🔍 localStorage keys:', Object.keys(localStorage));
+            
+            const pelunasanFingerprint = await generateImageFingerprint(pelunasanFile);
+            console.log('📊 Pelunasan Fingerprint:', pelunasanFingerprint);
+            
+            // Step 1: Cek window memory dulu
+            let storedDPFingerprint = window.dpBuktiFingerprint;
+            console.log('Step 1 - window.dpBuktiFingerprint exists?', !!storedDPFingerprint);
+            
+            // Step 2: Jika tidak ada, restore dari localStorage dengan bookingID
+            if (!storedDPFingerprint && bookingID) {
+                console.log('Step 2 - Trying localStorage with bookingID...');
+                try {
+                    const localKey = `dpBuktiFingerprint_${bookingID}`;
+                    const localData = localStorage.getItem(localKey);
+                    console.log(`Step 2a - localStorage.getItem("${localKey}"):`, localData ? 'DATA_EXISTS (len=' + localData.length + ')' : 'NULL');
+                    
+                    if (localData) {
+                        storedDPFingerprint = JSON.parse(localData);
+                        window.dpBuktiFingerprint = storedDPFingerprint;
+                        console.log('✅ Successfully restored from localStorage (bookingID):', storedDPFingerprint);
+                    } else {
+                        // Step 3: Fallback ke generic localStorage key
+                        console.log('Step 3 - Trying generic localStorage key...');
+                        const genericData = localStorage.getItem('dpBuktiFingerprint');
+                        console.log('Step 3a - localStorage.getItem("dpBuktiFingerprint"):', genericData ? 'DATA_EXISTS (len=' + genericData.length + ')' : 'NULL');
+                        if (genericData) {
+                            storedDPFingerprint = JSON.parse(genericData);
+                            window.dpBuktiFingerprint = storedDPFingerprint;
+                            console.log('✅ Successfully restored from generic localStorage:', storedDPFingerprint);
+                        }
+                    }
+                } catch (e) {
+                    console.error('❌ localStorage restore failed:', e.message);
+                }
+            }
+            
+            // Step 4: Fallback ke sessionStorage
+            if (!storedDPFingerprint) {
+                console.log('Step 4 - Trying sessionStorage...');
+                try {
+                    const sessionData = sessionStorage.getItem('dpBuktiFingerprint');
+                    console.log('Step 4a - sessionStorage raw value:', sessionData ? 'DATA_EXISTS (len=' + sessionData.length + ')' : 'NULL');
+                    
+                    if (sessionData) {
+                        storedDPFingerprint = JSON.parse(sessionData);
+                        window.dpBuktiFingerprint = storedDPFingerprint;
+                        console.log('✅ Successfully restored from sessionStorage:', storedDPFingerprint);
+                    }
+                } catch (e) {
+                    console.error('❌ sessionStorage restore failed:', e.message);
+                }
+            }
+            
+            console.log('Step 5 - Final: storedDPFingerprint ready?', !!storedDPFingerprint);
+            
+            if (storedDPFingerprint) {
+                // 🔐 PERCEPTUAL HASH COMPARISON (Paling akurat)
+                const hashDistance = hammingDistance(pelunasanFingerprint.pHash, storedDPFingerprint.pHash);
+                console.log('📏 Hamming Distance:', hashDistance, '(0=identical, >7=different)');
+                
+                // METADATA COMPARISON
+                const isSameFileName = pelunasanFingerprint.fileName === storedDPFingerprint.fileName;
+                const isSimilarBrightness = Math.abs(pelunasanFingerprint.grayscaleAvg - storedDPFingerprint.grayscaleAvg) <= 5;
+                
+                console.log('Comparison Results:', {
+                    hammingDistance: hashDistance,
+                    sameFileName: isSameFileName,
+                    similarBrightness: isSimilarBrightness
+                });
+                
+                // ❌ DETEKSI DUPLIKAT: 
+                // - Hamming distance <= 5 (visual content yang sama)
+                // - DAN filename sama (double upload file yang sama)
+                // ATAU
+                // - Hamming distance == 0 (exact same image)
+                const isDuplicate = (hashDistance === 0) || 
+                                   (hashDistance <= 5 && isSameFileName && isSimilarBrightness);
+                
+                if (isDuplicate) {
+                    console.warn('⚠️ DUPLIKAT TERDETEKSI! Hash distance=' + hashDistance + ', Same name=' + isSameFileName);
+                    alert('❌ BUKTI PEMBAYARAN SAMA!\n\nGambar bukti yang Anda upload terdeteksi SAMA dengan bukti pembayaran panjar (DP) sebelumnya.\n\nSilakan upload bukti pembayaran yang BERBEDA untuk pelunasan (dari transaksi yang berbeda).');
+                    fileInput.value = '';  // Clear file selection
+                    ocrAttempts++;
+                    btnPelunasan.disabled = false;
+                    
+                    if (ocrAttempts >= 3) {
+                        btnPelunasan.className = 'btn-blink';
+                        btnPelunasan.innerText = "💬 CHAT ADMIN (MANUAL)";
+                        btnPelunasan.onclick = function(e) {
+                            e.preventDefault();
+                            hubungiAdmin('pelunasan');
+                        };
+                        if (!document.getElementById('infoGagalOCR')) {
+                            const infoText = document.createElement('p');
+                            infoText.id = 'infoGagalOCR';
+                            infoText.style.color = 'red';
+                            infoText.style.fontSize = '12px';
+                            infoText.style.fontWeight = 'bold';
+                            infoText.innerText = "*Sistem gagal verifikasi otomatis. Silakan Chat Admin.";
+                            btnPelunasan.parentNode.insertBefore(infoText, btnPelunasan);
+                        }
+                    } else {
+                        btnPelunasan.innerText = "COBA UPLOAD LAGI";
+                        btnPelunasan.onclick = function() { fileInput.click(); };  // Reset to file picker
+                        btnPelunasan.className = 'btn btn-warning';
+                    }
+                    isScanning = false;
+                    return;
+                }
+            } else {
+                // FALLBACK: Jika tidak ada DP fingerprint tersimpan, gunakan nominal comparison
+                console.log('⚠️ No DP fingerprint stored, checking nominal instead...');
+                console.log('Extracted Nominal from Pelunasan:', window.lastExtractedNominal, 'vs DP Nominal:', dpBayar);
+                
+                // DETEKSI DUPLIKAT: Jika nominal yang ter-extract dari pelunasan = nominal DP sebelumnya
+                // Kemungkinan besar user upload bukti DP lagi (duplikat)
+                if (window.lastExtractedNominal && dpBayar) {
+                    const nominalDiff = Math.abs(window.lastExtractedNominal - dpBayar);
+                    const percentDiff = (nominalDiff / dpBayar) * 100;
+                    
+                    console.log('📊 Nominal difference:', nominalDiff, 'Percentage:', percentDiff.toFixed(1) + '%');
+                    
+                    // Jika perbedaan < 1%, kemungkinan besar SAMA (duplikat)
+                    if (percentDiff < 1) {
+                        console.warn('⚠️ DUPLIKAT TERDETEKSI! Nominal sama dengan DP sebelumnya!');
+                        alert('❌ BUKTI PEMBAYARAN SAMA!\n\nNominal tanpa pajak Rp ' + window.lastExtractedNominal.toLocaleString() + ' terdeteksi SAMA dengan pembayaran DP sebelumnya (Rp ' + dpBayar.toLocaleString() + ').\n\nSilakan upload bukti pembayaran PELUNASAN dengan nominal yang berbeda.');
+                        fileInput.value = '';  // Clear file selection
+                        ocrAttempts++;
+                        btnPelunasan.disabled = false;
+                        
+                        if (ocrAttempts >= 3) {
+                            btnPelunasan.className = 'btn-blink';
+                            btnPelunasan.innerText = "💬 CHAT ADMIN (MANUAL)";
+                            btnPelunasan.onclick = function(e) {
+                                e.preventDefault();
+                                hubungiAdmin('pelunasan');
+                            };
+                            if (!document.getElementById('infoGagalOCR')) {
+                                const infoText = document.createElement('p');
+                                infoText.id = 'infoGagalOCR';
+                                infoText.style.color = 'red';
+                                infoText.style.fontSize = '12px';
+                                infoText.style.fontWeight = 'bold';
+                                infoText.innerText = "*Sistem gagal verifikasi otomatis. Silakan Chat Admin.";
+                                btnPelunasan.parentNode.insertBefore(infoText, btnPelunasan);
+                            }
+                        } else {
+                            btnPelunasan.innerText = "COBA UPLOAD LAGI";
+                            btnPelunasan.onclick = function() { fileInput.click(); };  // Reset to file picker
+                            btnPelunasan.className = 'btn btn-warning';
+                        }
+                        isScanning = false;
+                        return;
+                    }
+                }
+            }
+
+            // 2. RUN OCR untuk ekstrak nominal dari bukti
+            const ocrResult = await runOCR(pelunasanFile, sisaBayar);
+            const extractedNominal = window.lastExtractedNominal || 0;  // Nominal yang ter-ekstrak dari OCR
+            console.log('Extracted Nominal from Pelunasan:', extractedNominal, 'Expected Sisa:', sisaBayar);
+
+            // 3. DETEKSI BUKTI SAMA BERDASARKAN NOMINAL
+            // Jika nominal yang ter-ekstrak SAMA dengan DP sebelumnya, kemungkinan user upload bukti DP lagi
+            if (extractedNominal > 0 && dpBayar > 0) {
+                const nominalDiff = Math.abs(extractedNominal - dpBayar);
+                const percentDiff = (nominalDiff / dpBayar) * 100;
+                
+                // Jika perbedaan < 5%, kemungkinan besar bukti yang sama (tolak)
+                if (percentDiff < 5 && extractedNominal !== sisaBayar) {
+                    console.warn('⚠️ NOMINAL MENCURIGAKAN: Ekstrak nominal mirip dengan DP awal!');
+                    alert(`❌ BUKTI PEMBAYARAN DIDUGA SAMA!\n\nNominal Rp ${extractedNominal.toLocaleString()} mirip dengan pembayaran DP sebelumnya (Rp ${dpBayar.toLocaleString()}).\n\nSilakan upload bukti pelunasan yang BERBEDA dengan nominal Rp ${sisaBayar.toLocaleString()}.`);
+                    fileInput.value = '';  // Clear file selection
+                    ocrAttempts++;
+                    btnPelunasan.disabled = false;
+                    
+                    if (ocrAttempts >= 3) {
+                        btnPelunasan.className = 'btn-blink';
+                        btnPelunasan.innerText = "💬 CHAT ADMIN (MANUAL)";
+                        btnPelunasan.onclick = function(e) {
+                            e.preventDefault();
+                            hubungiAdmin('pelunasan');
+                        };
+                        if (!document.getElementById('infoGagalOCR')) {
+                            const infoText = document.createElement('p');
+                            infoText.id = 'infoGagalOCR';
+                            infoText.style.color = 'red';
+                            infoText.style.fontSize = '12px';
+                            infoText.style.fontWeight = 'bold';
+                            infoText.innerText = "*Sistem gagal verifikasi otomatis. Silakan Chat Admin.";
+                            btnPelunasan.parentNode.insertBefore(infoText, btnPelunasan);
+                        }
+                    } else {
+                        btnPelunasan.innerText = "COBA UPLOAD LAGI";
+                        btnPelunasan.onclick = function() { fileInput.click(); };  // Reset to file picker
+                        btnPelunasan.className = 'btn btn-warning';
+                    }
+                    isScanning = false;
+                    return;
+                }
+            }
+
+            // 4. Normal OCR validation dilanjutkan
+            if (ocrResult) {
+                ocrAttempts = 0; 
+                btnPelunasan.disabled = false;
+                btnPelunasan.className = 'btn btn-primary';
+                btnPelunasan.innerText = "✅ KONFIRMASI PELUNASAN";
+                btnPelunasan.onclick = function() { processPelunasan(); }; 
+            } else {
+                ocrAttempts++;
+                if (ocrAttempts >= 3) {
+                    btnPelunasan.className = 'btn-blink'; 
+                    btnPelunasan.innerText = "💬 CHAT ADMIN (MANUAL)";
+                    btnPelunasan.disabled = false;
+                    btnPelunasan.onclick = null;
+                    btnPelunasan.onclick = function(e) { 
+                        e.preventDefault();
+                        hubungiAdmin('pelunasan'); 
+                    };
+
+                    if (!document.getElementById('infoGagalOCR')) {
+                        const infoText = document.createElement('p');
+                        infoText.id = 'infoGagalOCR';
+                        infoText.style.color = 'red';
+                        infoText.style.fontSize = '12px';
+                        infoText.style.fontWeight = 'bold';
+                        infoText.innerText = "*Sistem gagal verifikasi otomatis. Silakan Chat Admin.";
+                        btnPelunasan.parentNode.insertBefore(infoText, btnPelunasan);
+                    }
+                } else {
+                    alert(`❌ Bukti tidak cocok. Percobaan ${ocrAttempts}/3.\n\n📌 Pastikan screenshot berisi:\n✓ Nominal: Rp ${sisaBayar.toLocaleString()}\n✓ Jika E-wallet: HARUS tulisan "Dari: [Provider]" atau "From: [Provider]" (e.g. "Dari: Dana", "From: GoPay") + status (TRANSFER BERHASIL/PEMBAYARAN BERHASIL)\n✓ Jika Bank: Nama/rekening + bank digital`);
+                    fileInput.value = '';  // Clear file selection
+                    btnPelunasan.innerText = "COBA UPLOAD LAGI";
+                    btnPelunasan.disabled = false;
+                    btnPelunasan.onclick = function() { fileInput.click(); };  // Reset to file picker
+                    btnPelunasan.className = 'btn btn-warning';
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            alert('⚠️ Terjadi kesalahan saat memproses bukti. Silakan coba lagi.');
+            btnPelunasan.disabled = false;
+        } finally {
+            isScanning = false;
+        }    
     }
+
+    // Fungsi bantu untuk membuat label status jika belum ada di HTML
+    function createStatusLabel() {
+        const input = document.getElementById('buktiTransferFile');
+        const label = document.createElement('div');
+        label.id = 'statusOCRLabel';
+        label.style.fontSize = '12px';
+        label.style.marginTop = '5px';
+        input.parentNode.appendChild(label);
+        return label;
+    }    
 
     document.getElementById('datePicker').addEventListener('change', async function() {
         const val = this.value;
-        // Jika tanggal termasuk dalam daftar non-aktif, tolak pilihan
-        if (isDateDisabled(val)) {
-            alert('Mohon Maaf, tanggal tersebut sudah full. Silakan pilih tanggal lain.');
-            this.value = '';
-            document.getElementById('priceInfo').innerText = 'Tanggal tidak tersedia';
-            const btnNext = document.getElementById('btnNext1');
-            if (btnNext) {
-                btnNext.disabled = true;
-                btnNext.style.opacity = '0.5';
-            }
-            return;
-        }
+        
         if(!val) return;
         window.currentTanggalCantik = getTanggalCantik(val);
         const selDate = new Date(val);
@@ -1062,11 +1963,7 @@
     (function setupRescheduleDateValidation(){
         const newDateEl = document.getElementById('newDate');
         if (!newDateEl) return;
-        newDateEl.addEventListener('change', function(){
-            if (isDateDisabled(this.value)) {
-                alert('Maaf, tanggal yang dipilih tidak tersedia untuk reschedule.');
-                this.value = '';
-            }
+        newDateEl.addEventListener('change', function(){            
         });
     })();
 
@@ -1075,6 +1972,13 @@
         const d = new Date(dateStr);
         const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
+    }
+
+    function getNominalNumber() {
+        const input = document.getElementById('nominalTransfer'); // Pastikan ID ini sesuai di HTML Anda
+        if (!input) return 0;
+        // Menghapus semua karakter non-angka
+        return parseInt(input.value.replace(/\D/g, '')) || 0;
     }
 
     function checkQuotaAndTerms() {
@@ -1171,23 +2075,52 @@
 
     document.getElementById('reservationForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Validasi: cek apakah tanggal dipilih ada di daftar ter-disable
+        const selectedDate = document.getElementById('datePicker').value;
+        if (disabledDatesSet.has(selectedDate)) {
+            alert('⚠️ Maaf, tanggal ' + selectedDate + ' tidak tersedia untuk reservasi.');
+            return;
+        }
+        
         window.isReschedule = false;
-        const btn = document.getElementById('submitBtn'); btn.innerText = "MENGIRIM..."; btn.disabled = true;
+        const btn = document.getElementById('submitBtn'); 
+        btn.innerText = "MENGIRIM..."; 
+        btn.disabled = true;
+        
         const dateVal = document.getElementById('datePicker').value;
         const d = new Date(dateVal);
         const randomChars = Array.from({length: 3}, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
         const totalPax = document.getElementById('paxTotal').value;
         const bookingID = `${("0"+d.getDate()).slice(-2)}${("0"+(d.getMonth()+1)).slice(-2)}-${totalPax.padStart(2,'0')}-${randomChars}`;
+        
+        // TRACKING: Simpan DP Fingerprint dengan bookingID agar bisa di-retrieve saat pelunasan
+        if (window.dpBuktiFingerprint) {
+            try {
+                localStorage.setItem(`dpBuktiFingerprint_${bookingID}`, JSON.stringify(window.dpBuktiFingerprint));
+                console.log(`💾 DP Fingerprint saved with bookingID: ${bookingID}`);
+            } catch (e) {
+                console.warn('⚠️ Could not save fingerprint to localStorage:', e);
+            }
+        }
+        
         const f = new FormData(e.target);
 
-        await generateSuccessTicket(bookingID, dateVal, `${f.get('title')} ${f.get('fname')} ${f.get('lname')}`, window.currentPaxDetail, false);
-
         try {
-            const canvas = await html2canvas(document.querySelector("#captureArea"), { scale: 2, useCORS: true });
-            const tiketBase64 = canvas.toDataURL("image/png").split(',')[1];
+            // Generate tiket terlebih dahulu
+            await generateSuccessTicket(bookingID, dateVal, `${f.get('title')} ${f.get('fname')} ${f.get('lname')}`, window.currentPaxDetail, false);
+            
+            // Show notification setelah tiket berhasil di-generate
+            showNotification('newReservation', bookingID);
+
+            // Proses upload ke server (di background, tidak blok notifikasi)
             const file = document.getElementById('buktiBayar').files[0];
             const reader = new FileReader();
             reader.onload = async function(evt) {
+                // Get canvas setelah notification ditampilkan (dari generateSuccessTicket)
+                const canvas = document.querySelector("#captureArea") ? await html2canvas(document.querySelector("#captureArea"), { scale: 2, useCORS: true }) : null;
+                const tiketBase64 = canvas ? canvas.toDataURL("image/png").split(',')[1] : "";
+                
                 // Generate nama file berdasarkan status tiket pada saat newBooking
                 const ticketFileName = generateTicketFileName(bookingID, false, (Number(dataInvoice.sisa) <= 0));
                 
@@ -1210,10 +2143,26 @@
                     menuName: menuData[dateVal], 
                     action: "newBooking"
                 };
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                
+                // Fetch & handle response untuk cek apakah ada kesalahan dari server
+                try {
+                    const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                    const respText = await resp.text();
+                    if (respText.includes('DATE_CLOSED')) {
+                        console.warn('Date closed warning but notification already shown');
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Submit error:', err);
+                }
             };
             reader.readAsDataURL(file);
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error('Form submission error:', err);
+            alert('❌ Terjadi kesalahan. Silakan coba lagi.');
+            btn.innerText = "KIRIM RESERVASI";
+            btn.disabled = false;
+        }
     });
 
     async function processPelunasan() {
@@ -1251,10 +2200,7 @@
                     dataInvoice.bayar = Number(dataInvoice.bayar) + Number(dataInvoice.sisa);
                     dataInvoice.sisa = 0;
 
-                    // 2. Beri notifikasi
-                    alert("Pembayaran Lunas Berhasil Diverifikasi!");
-
-                    // 3. Pemicu Tiket Lunas
+                    // 2. Pemicu Tiket Lunas
                     // Gunakan window.rescheduleCount untuk menentukan apakah booking telah direschedule
                     // Jika rescheduleCount >= 1, maka tiket bernama Tiket-(ID)-Reschedule-Paid.png
                     // Jika rescheduleCount == 0, maka tiket bernama Tiket-(ID)-Paid.png
@@ -1267,6 +2213,8 @@
                         isAlreadyRescheduled                     // isReschedule = true hanya jika sudah reschedule sebelumnya
                     );
 
+                    // 3. Show notification - auto-download dan refresh akan ditangani oleh modal
+                    showNotification('pelunasan', id);
                 } else {
                     alert("Gagal: " + result);
                 }
@@ -1281,22 +2229,45 @@
         reader.readAsDataURL(file);
     }
 
-    function hubungiAdmin() {
-        const nomorAdmin = "6281119122266"; // GANTI DENGAN NOMOR ANDA
+    function hubungiAdmin(konteks) {
+        const nomorAdmin = "6281119122266";
         let pesan = "";
 
-        // 1. Ambil data pendukung dari form
-        const tanggal = document.getElementById('datePicker').value;
-        const namaUser = document.getElementById('fnameInput') ? document.getElementById('fnameInput').value : "";
+        // 1. Ambil data pendukung
+        const tanggal = document.getElementById('datePicker') ? document.getElementById('datePicker').value : "";
+        const namaUser = document.getElementById('fnameInput') ? document.getElementById('fnameInput').value : "Tamu";
         const telpUser = document.getElementById('phoneInput') ? document.getElementById('phoneInput').value : "";
+        const resID = document.getElementById('resID') ? document.getElementById('resID').value : "";
 
-        // 2. Deteksi Step yang sedang aktif (tidak memiliki class 'hidden')
-        const step1Aktif = !document.getElementById('step1').classList.contains('hidden');
-        const step2Aktif = !document.getElementById('step2').classList.contains('hidden');
-        const step3Aktif = !document.getElementById('step3').classList.contains('hidden');
+        // 2. Deteksi Aktif (Ditambah parameter konteks untuk akurasi)
+        const step1Aktif = document.getElementById('step1') && !document.getElementById('step1').classList.contains('hidden');
+        const step2Aktif = document.getElementById('step2') && !document.getElementById('step2').classList.contains('hidden');
+        const step3Aktif = document.getElementById('step3') && !document.getElementById('step3').classList.contains('hidden');
+    
+        // Cek apakah modal tampil atau parameter konteks berisi 'pelunasan'
+        const modalPelunasanAktif = (konteks === 'pelunasan') || 
+                                    (document.getElementById('modalPelunasan') && 
+                                    (document.getElementById('modalPelunasan').classList.contains('show') || 
+                                    document.getElementById('modalPelunasan').style.display === 'block'));
 
         // 3. Logika Pesan Dinamis
-        if (step1Aktif) {
+    
+        // --- KONDISI GAGAL OCR (3x ATAU LEBIH) ---
+        if (typeof ocrAttempts !== 'undefined' && ocrAttempts >= 3) {
+            if (modalPelunasanAktif) {
+                const nominalSisa = (typeof dataInvoice !== 'undefined') ? dataInvoice.sisa : 0;
+                pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya gagal verifikasi OCR untuk PELUNASAN (ID: ${resID}) dengan nominal Rp ${nominalSisa.toLocaleString()}. Mohon bantuannya untuk verifikasi manual.`;
+            } 
+            else if (step3Aktif) {
+                const nominalDP = typeof getNominalNumber === 'function' ? getNominalNumber() : 0;
+                pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya gagal verifikasi OCR untuk RESERVASI tanggal ${tanggal} dengan nominal Rp ${nominalDP.toLocaleString()}. Mohon bantuannya untuk verifikasi manual.`;
+            }
+        } 
+        // --- KONDISI NORMAL (STEP BY STEP) ---
+        else if (modalPelunasanAktif) {
+            pesan = `Halo Admin Astanarasa, saya ${namaUser}. Saya ingin bertanya mengenai pelunasan reservasi ID: ${resID}.`;
+        }
+        else if (step1Aktif) {
             pesan = `Halo Admin Astanarasa, saya ingin bertanya mengenai reservasi untuk tanggal: ${tanggal || '(Belum pilih tanggal)'}.`;
         } 
         else if (step2Aktif) {
@@ -1309,30 +2280,11 @@
             pesan = "Halo Admin Astanarasa, saya butuh bantuan mengenai reservasi di website.";
         }
 
-        // 4. Eksekusi Kirim ke WhatsApp
+        // 4. Eksekusi
         const url = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
-        window.location.href = url;
+        window.open(url, '_blank');
     }
 
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
