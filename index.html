@@ -142,7 +142,7 @@
             <div id="step1">
                 <div class="mb-4">
                     <label class="form-label">Pilih Tanggal Reservasi*</label>
-                    <input type="date" name="date" id="datePicker" class="form-control" required min="2026-02-19" max="2026-03-20">
+                    <input type="text" name="date" id="datePicker" class="form-control" required placeholder="YYYY-MM-DD" min="2026-02-19" max="2026-03-20">
                     <div id="priceInfo" class="small mt-1 text-muted fw-bold"></div>
                 </div>
                 <div id="menuContainer" class="hidden" onclick="showLightbox()">
@@ -310,7 +310,7 @@
                     <h5 class="fw-bold mb-3" style="color: #333; font-size: 1rem;">Pilih Tanggal Baru</h5>
                     <div id="resInfo2" class="alert alert-info py-3 mb-3" style="font-size: 0.85rem; border-radius: 10px; background: #e7f3ff; border: 1px solid #b3d9ff; color: #004085; margin: 0;"></div>
                     <label class="form-label" style="font-size: 0.8rem;">Tanggal Reservasi Baru*</label>
-                    <input type="date" id="newDate" class="form-control mb-4" style="padding: 12px; font-size: 16px; border-radius: 8px;">
+                    <input type="text" id="newDate" class="form-control mb-4" placeholder="YYYY-MM-DD" style="padding: 12px; font-size: 16px; border-radius: 8px;">
                     <button type="button" class="btn w-100 fw-bold" id="btnSaveReschedule" onclick="submitReschedule()" style="background: #28a745; color: #fff; font-size: 0.95rem; min-height: 48px; padding: 12px; border-radius: 8px; border: none;">SIMPAN PERUBAHAN</button>
                 </div>
 
