@@ -512,6 +512,13 @@
         shouldAutoRefresh: false
     };
     
+    // Global state untuk data reservasi baru (untuk WhatsApp notifikasi)
+    let newReservationData = {
+        bookingID: null,
+        customerName: null,
+        paxDetail: null
+    };
+    
     // Fungsi untuk menampilkan notification modal
     function showNotification(mode, bookingID = null) {
         console.log('📢 Showing notification:', mode, bookingID);
@@ -596,6 +603,16 @@
             console.log('✅ Modal hidden');
         }
         
+        // ✅ FITUR BARU: Buka WhatsApp setelah OK diklik (hanya untuk reservasi baru)
+        if (notificationState.mode === 'newReservation' && newReservationData.bookingID) {
+            console.log('📱 Membuka WhatsApp untuk notifikasi reservasi...');
+            sendWhatsAppToAdmin(
+                newReservationData.bookingID,
+                newReservationData.customerName,
+                newReservationData.paxDetail
+            );
+        }
+        
         // Show successOverlay yang sudah di-render di DOM
         const successOverlay = document.getElementById('successOverlay');
         if (successOverlay) {
@@ -612,9 +629,20 @@
             setTimeout(() => {
                 console.log('⬇️ Triggering download...');
                 dlBtn.click();
+                
+                // ✅ FITUR BARU: Auto-refresh halaman setelah 3 detik (untuk memastikan download selesai)
+                setTimeout(() => {
+                    console.log('🔄 Auto-refresh halaman dimulai...');
+                    window.location.reload();
+                }, 3000);
             }, 300);
         } else {
             console.warn('⚠️ dlAction button not found, download will not trigger');
+            // Tetap refresh meski download tidak trigger
+            setTimeout(() => {
+                console.log('🔄 Auto-refresh halaman dimulai (no download)...');
+                window.location.reload();
+            }, 2000);
         }
     }
     
@@ -2110,10 +2138,16 @@
             // Generate tiket terlebih dahulu
             await generateSuccessTicket(bookingID, dateVal, `${f.get('title')} ${f.get('fname')} ${f.get('lname')}`, window.currentPaxDetail, false);
             
+            // ✅ SIMPAN DATA RESERVASI - akan digunakan untuk WhatsApp setelah OK diklik
+            newReservationData.bookingID = bookingID;
+            newReservationData.customerName = `${f.get('title')} ${f.get('fname')} ${f.get('lname')}`;
+            newReservationData.paxDetail = window.currentPaxDetail;
+            console.log('💾 Reservation data saved:', newReservationData);
+            
             // Show notification setelah tiket berhasil di-generate
             showNotification('newReservation', bookingID);
 
-            // Proses upload ke server (di background, tidak blok notifikasi)
+            // Proses upload ke server (di background, tidak blok notifikasi dan tidak blok WhatsApp)
             const file = document.getElementById('buktiBayar').files[0];
             const reader = new FileReader();
             reader.onload = async function(evt) {
@@ -2148,12 +2182,17 @@
                 try {
                     const resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                     const respText = await resp.text();
+                    console.log('📡 Server Response:', respText);
+                    
                     if (respText.includes('DATE_CLOSED')) {
-                        console.warn('Date closed warning but notification already shown');
+                        console.warn('⚠️ Date closed warning but notification already shown');
                         return;
                     }
+                    
+                    // Server upload selesai, log success
+                    console.log('✅ Data reservasi berhasil disimpan ke server');
                 } catch (err) {
-                    console.error('Submit error:', err);
+                    console.error('❌ Server upload error:', err);
                 }
             };
             reader.readAsDataURL(file);
@@ -2227,6 +2266,36 @@
             }
         };
         reader.readAsDataURL(file);
+    }
+
+    // FITUR: Customer auto-send WhatsApp ke admin untuk konfirmasi & cross-check data reservasi
+    // Dipanggil setelah customer klik OK pada notification modal
+    function sendWhatsAppToAdmin(bookingID, customerName, paxDetail) {
+        const nomorAdmin = "6281119122266";
+        
+        // Format pesan dengan line breaks yang rapi menggunakan \n
+        const pesan = "Halo Admin Astanarasa, Saya sudah melakukan reservasi dengan data sebagai berikut:\n\n" +
+                      " - ID Booking: " + bookingID + "\n" +
+                      " - Nama: " + customerName + "\n" +
+                      " - Jumlah Pax: " + paxDetail + "\n\n" +
+                      "Mohon verifikasi bahwa data saya sudah masuk dalam daftar reservasi. Terima kasih!";
+        
+        try {
+            const waLink = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+            console.log('✅ Membuka WhatsApp untuk customer kirim notifikasi ke admin:', bookingID);
+            console.log('📱 Pesan WhatsApp:\n', pesan);
+            
+            // Buka WhatsApp dengan pesan sudah terisi - customer tinggal tap Send
+            const waWindow = window.open(waLink, '_blank', 'width=900,height=700');
+            
+            if (!waWindow || waWindow.closed) {
+                console.warn('⚠️ Pop-up blocker mungkin aktif. Silakan izinkan pop-up.');
+            } else {
+                console.log('✅ WhatsApp berhasil dibuka');
+            }
+        } catch (e) {
+            console.warn('⚠️ Gagal membuka WhatsApp:', e);
+        }
     }
 
     function hubungiAdmin(konteks) {
